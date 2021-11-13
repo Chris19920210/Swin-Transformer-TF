@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D
+import os
+
 
 CFGS = {
     'swin_tiny_224': dict(input_size=(224, 224), window_size=7, embed_dim=96, depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24]),
@@ -425,7 +427,7 @@ class SwinTransformerModel(tf.keras.Model):
         return x
 
 
-def SwinTransformer(model_name='swin_tiny_224', num_classes=1000, include_top=True, pretrained=True, use_tpu=False, cfgs=CFGS):
+def SwinTransformer(model_path, model_name='swin_tiny_224', num_classes=1000, include_top=True, pretrained=True, use_tpu=False, cfgs=CFGS):
     cfg = cfgs[model_name]
     net = SwinTransformerModel(
         model_name=model_name, include_top=include_top, num_classes=num_classes, img_size=cfg['input_size'], window_size=cfg[
@@ -433,9 +435,8 @@ def SwinTransformer(model_name='swin_tiny_224', num_classes=1000, include_top=Tr
     )
     net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
     if pretrained is True:
-        url = f'https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/{model_name}.tgz'
-        pretrained_ckpt = tf.keras.utils.get_file(
-            model_name, url, untar=True)
+        pretrained_ckpt = model_path
+
     else:
         pretrained_ckpt = pretrained
 
@@ -451,3 +452,4 @@ def SwinTransformer(model_name='swin_tiny_224', num_classes=1000, include_top=Tr
             net.load_weights(pretrained_ckpt)
 
     return net
+
