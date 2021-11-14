@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D
+from utils import gelu
 
 
 CFGS = {
@@ -24,7 +25,7 @@ class Mlp(tf.keras.layers.Layer):
 
     def call(self, x):
         x = self.fc1(x)
-        x = tf.keras.activations.gelu(x)
+        x = gelu(x)
         x = self.drop(x)
         x = self.fc2(x)
         x = self.drop(x)
@@ -68,7 +69,7 @@ class WindowAttention(tf.keras.layers.Layer):
         self.relative_position_bias_table = self.add_weight(f'{self.prefix}/attn/relative_position_bias_table',
                                                             shape=(
                                                                 (2 * self.window_size[0] - 1) * (2 * self.window_size[1] - 1), self.num_heads),
-                                                            initializer=tf.initializers.Zeros(), trainable=True)
+                                                            initializer=tf.keras.initializers.Zeros(), trainable=True)
 
         coords_h = np.arange(self.window_size[0])
         coords_w = np.arange(self.window_size[1])
@@ -193,8 +194,8 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
                 mask_windows, shape=[-1, self.window_size * self.window_size])
             attn_mask = tf.expand_dims(
                 mask_windows, axis=1) - tf.expand_dims(mask_windows, axis=2)
-            attn_mask = tf.where(attn_mask != 0, -100.0, attn_mask)
-            attn_mask = tf.where(attn_mask == 0, 0.0, attn_mask)
+            attn_mask = tf.where(attn_mask != 0, -100.0*tf.ones_like(attn_mask, tf.float64), attn_mask)
+            attn_mask = tf.where(attn_mask == 0, tf.zeros_like(attn_mask, tf.float64), attn_mask)
             self.attn_mask = tf.Variable(
                 initial_value=attn_mask, trainable=False, name=f'{self.prefix}/attn_mask')
         else:
@@ -377,7 +378,7 @@ class SwinTransformerModel(tf.keras.Model):
             self.absolute_pos_embed = self.add_weight('absolute_pos_embed',
                                                       shape=(
                                                           1, num_patches, embed_dim),
-                                                      initializer=tf.initializers.Zeros())
+                                                      initializer=tf.keras.initializers.Zeros())
 
         self.pos_drop = Dropout(drop_rate)
 

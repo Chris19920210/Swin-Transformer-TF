@@ -1,5 +1,5 @@
 import tensorflow as tf
-from swintransformer import SwinTransformer
+from model import SwinTransformer
 from utils import DataAugmentation, train_dataset, val_dataset, infer_dataset
 import pickle as pkl
 import os
@@ -29,7 +29,6 @@ def main(_):
             tf.keras.layers.Lambda(
                 lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"),
                 input_shape=[*IMAGE_SIZE, 3]),
-            DataAugmentation(),
             SwinTransformer(FLAGS.model_path, FLAGS.model_name, include_top=False, pretrained=True),
             tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
         ])
@@ -43,18 +42,19 @@ def main(_):
                 save_freq='epoch'),
         ]
 
-        label_to_index, train_ds = train_dataset(FLAGS.train_data_dir, IMAGE_SIZE, batch_size=FLAGS.batch_size)
+        label_to_index, train_ds = train_dataset(FLAGS.train_data_dir, IMAGE_SIZE, batch_size=FLAGS.batch_size, epochs=FLAGS.epochs)
         _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE, label_to_index, batch_size=FLAGS.batch_size, shuffle=False)
+        pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
-            loss=tf.keras.metrics.SparseCategoricalAccuracy(),
-            metrics=[tf.keras.metrics.SparseCategoricalAccuracy()]
+            loss='sparse_categorical_crossentropy',
+            metrics=["accuracy"]
         )
 
         history = model.fit(train_ds, epochs=FLAGS.epochs, validation_data=val_ds, callbacks=callbacks)
+        pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
-        pkl.dump(history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
         if FLAGS.mode == "eval":
             model = tf.keras.Sequential([

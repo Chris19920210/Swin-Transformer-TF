@@ -1,32 +1,36 @@
 import tensorflow as tf
 import pathlib
+from tensorflow.python.ops import math_ops
+from tensorflow.python.framework import ops
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
-def train_dataset(data_root, image_size, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, label_to_index=None, normalize=normalize,
+def train_dataset(data_root, image_size, epochs, normalize=False, batch_size=128, shuffle=True):
+    return load_dataset(data_root, image_size=image_size, epochs=epochs,label_to_index=None, normalize=normalize,
                         batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def val_dataset(data_root, image_size, label_to_index, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, normalize=normalize,
+def val_dataset(data_root, image_size, label_to_index, epochs=1, normalize=False, batch_size=128, shuffle=True):
+    return load_dataset(data_root, image_size=image_size, epochs=epochs, label_to_index=label_to_index, normalize=normalize,
                         batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def infer_dataset(data_root, image_size, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, label_to_index=None, normalize=normalize,
+def infer_dataset(data_root, image_size, epochs=1, normalize=False, batch_size=128, shuffle=True):
+    return load_dataset(data_root, image_size=image_size, epochs=epochs, label_to_index=None, normalize=normalize,
                         batch_size=batch_size, shuffle=shuffle, with_label=False)
 
 
 def load_dataset(data_root,
-                 image_size, label_to_index=None,
+                 image_size, epochs=1, label_to_index=None,
                  normalize=True, batch_size=128, 
                  shuffle=True, with_label=True):
     
     data_root = pathlib.Path(data_root)
     if with_label:
         all_image_paths = list(data_root.glob('*/*'))
+        all_image_paths = [str(path) for path in all_image_paths]
+
         if label_to_index is None:
             label_names = sorted(item.name for item in data_root.glob('*/') if item.is_dir())
             label_to_index = dict((name, index) for index, name in enumerate(label_names))
@@ -40,13 +44,14 @@ def load_dataset(data_root,
                     load_and_preprocess_from_path_label(image_path, image_label, image_size, normalize))
     else:
         all_image_paths = list(data_root.glob('*/'))
+        all_image_paths = [str(path) for path in all_image_paths]
         ds = tf.data.Dataset.from_tensor_slices(all_image_paths)
         ds = ds.map(lambda image_path: load_and_preprocess_image(image_path, image_size, normalize))
 
     if shuffle:
         image_count = len(all_image_paths)
         ds = ds.shuffle(buffer_size=image_count)
-    ds = ds.repeat()
+    ds = ds.repeat(epochs)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size=AUTOTUNE)
     return label_to_index, ds
@@ -88,3 +93,14 @@ class DataAugmentation(tf.keras.layers.Layer):
                                                      channel_axis=2)
         return x
 
+def gelu(features, approximate=False, name=None):
+    with ops.name_scope(name, "Gelu", [features]):
+        features = ops.convert_to_tensor(features, name="features")
+        if approximate:
+            coeff = math_ops.cast(0.044715, features.dtype)
+            return 0.5 * features * (
+                1.0 + math_ops.tanh(0.7978845608028654 *
+                                  (features + coeff * math_ops.pow(features, 3))))
+        else:
+            return 0.5 * features * (1.0 + math_ops.erf(
+                features / math_ops.cast(1.4142135623730951, features.dtype)))
