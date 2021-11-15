@@ -6,25 +6,25 @@ from tensorflow.python.framework import ops
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
-def train_dataset(data_root, image_size, epochs, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, epochs=epochs,label_to_index=None, normalize=normalize,
+def train_dataset(data_root, image_size, normalize=False, batch_size=128, shuffle=True):
+    return load_dataset(data_root, image_size=image_size, label_to_index=None, normalize=normalize,
                         batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def val_dataset(data_root, image_size, label_to_index, epochs=1, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, epochs=epochs, label_to_index=label_to_index, normalize=normalize,
-                        batch_size=batch_size, shuffle=shuffle, with_label=True)
+def val_dataset(data_root, image_size, label_to_index, normalize=False, batch_size=128, shuffle=False):
+    return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, normalize=normalize,
+                        batch_size=batch_size, shuffle=shuffle, with_label=True, repeat=False)
 
 
-def infer_dataset(data_root, image_size, epochs=1, normalize=False, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, epochs=epochs, label_to_index=None, normalize=normalize,
-                        batch_size=batch_size, shuffle=shuffle, with_label=False)
+def infer_dataset(data_root, image_size, normalize=False, batch_size=128, shuffle=True):
+    return load_dataset(data_root, image_size=image_size, label_to_index=None, normalize=normalize,
+                        batch_size=batch_size, shuffle=shuffle, with_label=False, repeat=False)
 
 
 def load_dataset(data_root,
-                 image_size, epochs=1, label_to_index=None,
+                 image_size, label_to_index=None,
                  normalize=True, batch_size=128, 
-                 shuffle=True, with_label=True):
+                 shuffle=True, with_label=True, repeat=True):
     
     data_root = pathlib.Path(data_root)
     if with_label:
@@ -51,10 +51,13 @@ def load_dataset(data_root,
     if shuffle:
         image_count = len(all_image_paths)
         ds = ds.shuffle(buffer_size=image_count)
-    ds = ds.repeat(epochs)
+    if repeat:
+        ds = ds.repeat()
+    else:
+        ds = ds.repeat(1)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size=AUTOTUNE)
-    return label_to_index, ds
+    return len(all_image_paths), label_to_index, ds
 
 
 def preprocess_image(image, image_size, normalize=False):
