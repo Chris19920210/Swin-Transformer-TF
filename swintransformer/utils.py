@@ -70,6 +70,7 @@ def preprocess_image(image, image_size, normalize=False):
     
 def load_and_preprocess_image(path, image_size, normalize=False):
     image = tf.io.read_file(path)
+    print(image_size, "======")
     return preprocess_image(image, image_size, normalize=normalize)
 
 

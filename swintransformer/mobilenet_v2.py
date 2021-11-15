@@ -82,6 +82,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.api._v1.keras.applications import imagenet_utils
 from tensorflow.python.keras.api._v1.keras.applications.imagenet_utils import decode_predictions
+from tensorflow.python.keras.applications import keras_modules_injection
+
 
 # TODO Change path to v1.1
 BASE_WEIGHT_PATH = ('https://github.com/JonathanCMitchell/mobilenet_v2_keras/'
@@ -607,3 +609,9 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
     if in_channels == pointwise_filters and stride == 1:
         return layers.Add(name=prefix + 'add')([inputs, x])
     return x
+
+
+
+@keras_modules_injection
+def mobilenet_v2(*args, **kwargs):
+    return MobileNetV2(*args, **kwargs)
