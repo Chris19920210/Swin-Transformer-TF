@@ -10,6 +10,7 @@ flags = tf.app.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 2, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 128, 'batch size')
+flags.DEFINE_integer('val_batch_size', 128, 'batch size')
 flags.DEFINE_integer('num_classes', 10, 'num classes')
 flags.DEFINE_string('model_path', './swin_base_224', 'path to model ckpt')
 flags.DEFINE_string('model_name', 'swin_base_224', 'model name')
@@ -27,16 +28,12 @@ IMAGE_SIZE = {
         "mobile": (192, 192)
 }
 
-model_base = {
-}
-
 def get_model(model_path, model_name=""):
   if FLAGS.model_choice == "swin":
-    return [SwinTransformer(FLAGS.model_path, FLAGS.model_name, include_top=False, pretrained=True)],
+    return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)],
   else:
-    return [mobilenet_v2(FLAGS.model_path, input_shape=(192, 192, 3), include_top=False),
+    return [mobilenet_v2(model_path, input_shape=(192, 192, 3), include_top=False),
                tf.keras.layers.GlobalAveragePooling2D()]
-
 
 def main(_):
     if FLAGS.mode == "train":
@@ -63,7 +60,7 @@ def main(_):
         _, _, val_ds = val_dataset(FLAGS.val_data_dir,
                                    IMAGE_SIZE[FLAGS.model_choice],
                                    label_to_index,
-                                   batch_size=FLAGS.batch_size)
+                                   batch_size=FLAGS.val_batch_size)
 
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
@@ -77,7 +74,7 @@ def main(_):
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
                             validation_data=val_ds, callbacks=callbacks,
-                            steps_per_epoch=steps_per_epoch,
+                            steps_per_epoch=steps_per_epoch 
                             )
         pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
@@ -91,7 +88,7 @@ def main(_):
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
             label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
-            samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index, batch_size=FLAGS.batch_size)
+            samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index, batch_size=FLAGS.val_batch_size)
             model.compile(
                 optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
                 loss='sparse_categorical_crossentropy',
@@ -110,7 +107,7 @@ def main(_):
                 *model_base[FLAGS.model_choice],
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
-            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice], batch_size=FLAGS.batch_size)
+            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice], batch_size=FLAGS.val_batch_size)
 
             inference_results = model.predict(infer_ds)
             print("Finish inference:", inference_results.shape)
