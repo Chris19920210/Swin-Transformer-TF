@@ -41,7 +41,7 @@ def main(_):
     if FLAGS.mode == "train":
         model = tf.keras.Sequential([
             tf.keras.layers.Lambda(
-                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(tf.debugging.assert_all_finite(data, "failure"), tf.float32),
+                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                    mode="torch"),
                 input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
             *get_model(FLAGS.model_path, FLAGS.model_name),
@@ -68,7 +68,7 @@ def main(_):
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         steps_per_epoch = samples_num // FLAGS.batch_size
-        
+
         model = tf.keras.utils.multi_gpu_model(model, gpus=2)
 
         model.compile(

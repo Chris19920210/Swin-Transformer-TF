@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/swintransformer/autoaugment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/swintransformer/data.py" afterDir="false" />
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="with dataaugmentation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/mobilenet_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/mobilenet_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,6 +100,14 @@
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
     </task>
+    <task id="LOCAL-00001" summary="with dataaugmentation">
+      <created>1637044212499</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1637044212499</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -153,6 +156,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="with dataaugmentation" />
+    <option name="LAST_COMMIT_MESSAGE" value="with dataaugmentation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
