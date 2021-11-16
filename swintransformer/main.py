@@ -1,7 +1,7 @@
 import tensorflow as tf
 from model import SwinTransformer
-from utils import DataAugmentation, train_dataset, val_dataset, infer_dataset
-from mobilenet_v2 import mobilenet_v2 
+from data import train_dataset, val_dataset, infer_dataset
+from mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
 import numpy as np
@@ -24,22 +24,25 @@ flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
-        "swin": (224, 224),
-        "mobile": (192, 192)
+    "swin": (224, 224),
+    "mobile": (224, 224)
 }
 
+
 def get_model(model_path, model_name=""):
-  if FLAGS.model_choice == "swin":
-    return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)],
-  else:
-    return [mobilenet_v2(model_path, input_shape=(192, 192, 3), include_top=False),
-               tf.keras.layers.GlobalAveragePooling2D()]
+    if FLAGS.model_choice == "swin":
+        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)],
+    else:
+        return [mobilenet_v2(model_path, include_top=False),
+                tf.keras.layers.GlobalAveragePooling2D()]
+
 
 def main(_):
     if FLAGS.mode == "train":
         model = tf.keras.Sequential([
             tf.keras.layers.Lambda(
-                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"),
+                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
+                                                                                   mode="torch"),
                 input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
             *get_model(FLAGS.model_path),
             tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
@@ -74,7 +77,7 @@ def main(_):
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
                             validation_data=val_ds, callbacks=callbacks,
-                            steps_per_epoch=steps_per_epoch 
+                            steps_per_epoch=steps_per_epoch
                             )
         pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
@@ -84,11 +87,12 @@ def main(_):
                     lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
                     input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *model_base[FLAGS.model_choice],
+                *get_model(FLAGS.model_choice),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
             label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
-            samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index, batch_size=FLAGS.val_batch_size)
+            samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
+                                                 batch_size=FLAGS.val_batch_size)
             model.compile(
                 optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
                 loss='sparse_categorical_crossentropy',
@@ -104,10 +108,11 @@ def main(_):
                     lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
                     input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *model_base[FLAGS.model_choice],
+                *get_model(FLAGS.model_choice),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
-            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice], batch_size=FLAGS.val_batch_size)
+            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                           batch_size=FLAGS.val_batch_size)
 
             inference_results = model.predict(infer_ds)
             print("Finish inference:", inference_results.shape)

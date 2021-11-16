@@ -84,7 +84,6 @@ from tensorflow.python.keras.api._v1.keras.applications import imagenet_utils
 from tensorflow.python.keras.api._v1.keras.applications.imagenet_utils import decode_predictions
 from tensorflow.python.keras.applications import keras_modules_injection
 
-
 # TODO Change path to v1.1
 BASE_WEIGHT_PATH = ('https://github.com/JonathanCMitchell/mobilenet_v2_keras/'
                     'releases/download/v1.1/')
@@ -202,7 +201,7 @@ def _obtain_input_shape(input_shape,
                     raise ValueError('The input must have 3 channels; got '
                                      '`input_shape=' + str(input_shape) + '`')
                 if ((input_shape[1] is not None and input_shape[1] < min_size) or
-                   (input_shape[2] is not None and input_shape[2] < min_size)):
+                        (input_shape[2] is not None and input_shape[2] < min_size)):
                     raise ValueError('Input size must be at least ' +
                                      str(min_size) + 'x' + str(min_size) +
                                      '; got `input_shape=' +
@@ -216,7 +215,7 @@ def _obtain_input_shape(input_shape,
                     raise ValueError('The input must have 3 channels; got '
                                      '`input_shape=' + str(input_shape) + '`')
                 if ((input_shape[0] is not None and input_shape[0] < min_size) or
-                   (input_shape[1] is not None and input_shape[1] < min_size)):
+                        (input_shape[1] is not None and input_shape[1] < min_size)):
                     raise ValueError('Input size must be at least ' +
                                      str(min_size) + 'x' + str(min_size) +
                                      '; got `input_shape=' +
@@ -609,7 +608,6 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
     if in_channels == pointwise_filters and stride == 1:
         return layers.Add(name=prefix + 'add')([inputs, x])
     return x
-
 
 
 @keras_modules_injection
