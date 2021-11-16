@@ -181,13 +181,6 @@ def preprocess_for_train(image_bytes, image_size,
     image = tf.reshape(image, [image_size, image_size, 3])
 
     if augment_name:
-        try:
-            import sys
-            from official.efficientnet import autoaugment  # pylint: disable=g-import-not-at-top
-        except ImportError as e:
-            tf.logging.exception('Autoaugment is not supported in TF 2.x.')
-            raise e
-
         tf.logging.info('Apply AutoAugment policy %s', augment_name)
         input_image_type = image.dtype
         image = tf.clip_by_value(image, 0.0, 255.0)
@@ -251,7 +244,7 @@ def load_dataset(data_root,
 
     if shuffle:
         image_count = len(all_image_paths)
-        ds = ds.shuffle(buffer_size=image_count)
+        ds = ds.shuffle(buffer_size=image_count // 5)
     if repeat:
         ds = ds.repeat()
     else:

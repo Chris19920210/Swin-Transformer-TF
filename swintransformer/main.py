@@ -24,14 +24,14 @@ flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
-    "swin": (224, 224),
-    "mobile": (224, 224)
+    "swin": 224,
+    "mobile": 224
 }
 
 
 def get_model(model_path, model_name=""):
     if FLAGS.model_choice == "swin":
-        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)],
+        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)]
     else:
         return [mobilenet_v2(model_path, include_top=False),
                 tf.keras.layers.GlobalAveragePooling2D()]
@@ -41,10 +41,10 @@ def main(_):
     if FLAGS.mode == "train":
         model = tf.keras.Sequential([
             tf.keras.layers.Lambda(
-                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
+                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(tf.debugging.assert_all_finite(data, "failure"), tf.float32),
                                                                                    mode="torch"),
-                input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
-            *get_model(FLAGS.model_path),
+                input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
+            *get_model(FLAGS.model_path, FLAGS.model_name),
             tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
         ])
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
@@ -68,6 +68,8 @@ def main(_):
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         steps_per_epoch = samples_num // FLAGS.batch_size
+        
+        model = tf.keras.utils.multi_gpu_model(model, gpus=2)
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
@@ -86,8 +88,8 @@ def main(_):
                 tf.keras.layers.Lambda(
                     lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
-                    input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_choice),
+                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
+                *get_model(FLAGS.model_choice, FLAGS.model_name),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
             label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
@@ -107,8 +109,8 @@ def main(_):
                 tf.keras.layers.Lambda(
                     lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
-                    input_shape=[*IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_choice),
+                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
+                *get_model(FLAGS.model_choice, FLAGS.model_name),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
             _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],

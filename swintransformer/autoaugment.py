@@ -393,8 +393,8 @@ def invert(image):
 def wrap(image):
     """Returns 'image' with an extra channel set to all 1s."""
     shape = tf.shape(image)
-    extended_channel = tf.ones([shape[0], shape[1], 1], image.dtype)
-    extended = tf.concat([image, extended_channel], 2)
+    extended_channel = tf.ones_like(image)[:, :, 0]
+    extended = tf.concat([image, extended_channel[:,:, tf.newaxis]], 2)
     return extended
 
 
