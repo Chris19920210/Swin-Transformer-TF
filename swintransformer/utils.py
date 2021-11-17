@@ -3,6 +3,7 @@ from tensorflow.python.framework import ops
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
+import numpy as np
 
 
 def top3_acc(labels, logits): 
