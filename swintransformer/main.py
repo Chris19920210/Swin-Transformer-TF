@@ -5,6 +5,7 @@ from mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
 import numpy as np
+from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler
 
 flags = tf.app.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
@@ -20,7 +21,9 @@ flags.DEFINE_string('val_data_dir', './val_data', 'Directory to put the validati
 flags.DEFINE_string('infer_data_dir', './infer_data', 'Directory to put the inference data.')
 flags.DEFINE_string('output', './output', 'Directory to save model.')
 flags.DEFINE_string('label_to_index', './label_to_index.pkl', 'Directory to save model.')
+flags.DEFINE_integer('warmup_epochs', 10, 'Directory to save model.')
 flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
+flags.DEFINE_integer('gpus', 1, 'nums of gpus')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -65,16 +68,28 @@ def main(_):
                                    label_to_index,
                                    batch_size=FLAGS.val_batch_size)
 
+
+        total_steps = int(FLAGS.epochs * samples_num / FLAGS.batch_size)
+
+        warmup_steps = int(FLAGS.warmup_epochs* samples_num / FLAGS.batch_size)
+
+        warm_up_lr = WarmUpCosineDecayScheduler(learning_rate_base=FLAGS.learning_rate,
+                                            total_steps=int(FLAGS.epochs * samples_num / FLAGS.batch_size),
+                                            warmup_learning_rate=0.0,
+                                            warmup_steps=warmup_steps,
+                                            hold_base_rate_steps=0)
+
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         steps_per_epoch = samples_num // FLAGS.batch_size
         
-        model = tf.keras.utils.multi_gpu_model(model, gpus=2)
+        if FLAGS.gpus > 1:
+          model = tf.keras.utils.multi_gpu_model(model, gpus=FLAGS.gpus)
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
             loss='sparse_categorical_crossentropy',
-            metrics=["accuracy"]
+            metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
         )
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
@@ -98,7 +113,7 @@ def main(_):
             model.compile(
                 optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
                 loss='sparse_categorical_crossentropy',
-                metrics=["accuracy"]
+                metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
             )
             print("Evaluate on test data")
             results = model.evaluate(val_ds)

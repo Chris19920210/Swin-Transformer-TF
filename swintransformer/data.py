@@ -244,7 +244,7 @@ def load_dataset(data_root,
 
     if shuffle:
         image_count = len(all_image_paths)
-        ds = ds.shuffle(buffer_size=image_count // 5)
+        ds = ds.shuffle(buffer_size=image_count)
     if repeat:
         ds = ds.repeat()
     else:
