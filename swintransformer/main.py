@@ -1,7 +1,7 @@
 import tensorflow as tf
-from model import SwinTransformer
+from modelzoo.swin_model import SwinTransformer
 from data import train_dataset, val_dataset, infer_dataset
-from mobilenet_v2 import mobilenet_v2
+from modelzoo.mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
 import numpy as np
@@ -52,14 +52,7 @@ def main(_):
         ])
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
 
-        callbacks = [
-            tf.keras.callbacks.ModelCheckpoint(
-                filepath=checkpoint_path,
-                save_weights_only=True,
-                verbose=1,
-                save_freq='epoch'),
-        ]
-
+        # load data
         samples_num, label_to_index, train_ds = train_dataset(FLAGS.train_data_dir,
                                                               IMAGE_SIZE[FLAGS.model_choice],
                                                               batch_size=FLAGS.batch_size)
@@ -68,23 +61,32 @@ def main(_):
                                    label_to_index,
                                    batch_size=FLAGS.val_batch_size)
 
-
+        # lr schedule
         total_steps = int(FLAGS.epochs * samples_num / FLAGS.batch_size)
 
-        warmup_steps = int(FLAGS.warmup_epochs* samples_num / FLAGS.batch_size)
+        warmup_steps = int(FLAGS.warmup_epochs * samples_num / FLAGS.batch_size)
 
         warm_up_lr = WarmUpCosineDecayScheduler(learning_rate_base=FLAGS.learning_rate,
-                                            total_steps=int(FLAGS.epochs * samples_num / FLAGS.batch_size),
-                                            warmup_learning_rate=0.0,
-                                            warmup_steps=warmup_steps,
-                                            hold_base_rate_steps=0)
+                                                total_steps=total_steps,
+                                                warmup_learning_rate=0.0,
+                                                warmup_steps=warmup_steps,
+                                                hold_base_rate_steps=0)
+        # callbacks
+        callbacks = [
+            tf.keras.callbacks.ModelCheckpoint(
+                filepath=checkpoint_path,
+                save_weights_only=True,
+                verbose=1,
+                save_freq='epoch'),
+            warm_up_lr
+        ]
 
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         steps_per_epoch = samples_num // FLAGS.batch_size
 
         if FLAGS.gpus > 1:
-          model = tf.keras.utils.multi_gpu_model(model, gpus=FLAGS.gpus)
+            model = tf.keras.utils.multi_gpu_model(model, gpus=FLAGS.gpus)
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
