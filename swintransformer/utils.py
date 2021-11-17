@@ -126,3 +126,8 @@ class WarmUpCosineDecayScheduler(keras.callbacks.Callback):
             print('\nBatch %05d: setting learning '
                   'rate to %s.' % (self.global_step + 1, lr))
 
+
+def get_lr_metric(optimizer):
+    def lr(y_true, y_pred):
+        return optimizer.lr
+    return lr

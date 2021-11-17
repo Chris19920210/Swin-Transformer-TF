@@ -5,7 +5,7 @@ from modelzoo.mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
 import numpy as np
-from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler
+from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler, get_lr_metric
 
 flags = tf.app.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
@@ -68,7 +68,7 @@ def main(_):
 
         warm_up_lr = WarmUpCosineDecayScheduler(learning_rate_base=FLAGS.learning_rate,
                                                 total_steps=total_steps,
-                                                warmup_learning_rate=0.0,
+                                                warmup_learning_rate=1e-6,
                                                 warmup_steps=warmup_steps,
                                                 hold_base_rate_steps=0)
         # callbacks
@@ -87,11 +87,17 @@ def main(_):
 
         if FLAGS.gpus > 1:
             model = tf.keras.utils.multi_gpu_model(model, gpus=FLAGS.gpus)
+        
+        # optimizers
+        
+        optimizer = tf.keras.optimizers.Adam()
+
+        lr_metric = get_lr_metric(optimizer)
 
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
+            optimizer=optimizer,
             loss='sparse_categorical_crossentropy',
-            metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
+            metrics=["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]
         )
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
