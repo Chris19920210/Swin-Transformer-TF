@@ -1,5 +1,5 @@
 import tensorflow as tf
-from autoaugment import distort_image_with_autoaugment, distort_image_with_randaugment
+from data_processing.autoaugment import distort_image_with_autoaugment, distort_image_with_randaugment
 import pathlib
 
 CROP_PADDING = 32

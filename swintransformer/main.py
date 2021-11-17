@@ -1,6 +1,6 @@
 import tensorflow as tf
 from modelzoo.swin_model import SwinTransformer
-from data import train_dataset, val_dataset, infer_dataset
+from data_processing.data import train_dataset, val_dataset, infer_dataset
 from modelzoo.mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
