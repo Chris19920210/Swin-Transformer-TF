@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="delete nan checking">
-      <change afterPath="$PROJECT_DIR$/swintransformer/modelzoo/__init__.py" afterDir="false" />
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="modify">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/mobilenet_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/modelzoo/mobilenet_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/modelzoo/swin_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/swintransformer/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,10 +24,16 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_TAGS">
+      <GitPushTagMode>
+        <option name="argument" value="--tags" />
+        <option name="title" value="All" />
+      </GitPushTagMode>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/swintransformer/autoaugment.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/swintransformer/data_processing/autoaugment.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -92,6 +95,12 @@
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/swintransformer/data_processing" />
+      <recent name="$PROJECT_DIR$/swintransformer/modelzoo" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
@@ -118,7 +127,28 @@
       <option name="project" value="LOCAL" />
       <updated>1637076318397</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="modify">
+      <created>1637135580969</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1637135580969</updated>
+    </task>
+    <task id="LOCAL-00004" summary="modify">
+      <created>1637135666580</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1637135666580</updated>
+    </task>
+    <task id="LOCAL-00005" summary="modify">
+      <created>1637135718762</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1637135718762</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -171,7 +201,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="with dataaugmentation" />
     <MESSAGE value="delete nan checking" />
-    <option name="LAST_COMMIT_MESSAGE" value="delete nan checking" />
+    <MESSAGE value="modify" />
+    <option name="LAST_COMMIT_MESSAGE" value="modify" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

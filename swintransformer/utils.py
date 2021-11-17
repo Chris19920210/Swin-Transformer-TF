@@ -1,16 +1,17 @@
 from tensorflow.python.ops import math_ops
 from tensorflow.python.framework import ops
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import backend as K
 import numpy as np
 
 
-def top3_acc(labels, logits): 
-  return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=3)
+def top3_acc(labels, logits):
+    return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=3)
 
-def top5_acc(labels, logits): 
-  return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=5)
+
+def top5_acc(labels, logits):
+    return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=5)
+
 
 def gelu(features, approximate=False, name=None):
     with ops.name_scope(name, "Gelu", [features]):
@@ -23,6 +24,7 @@ def gelu(features, approximate=False, name=None):
         else:
             return 0.5 * features * (1.0 + math_ops.erf(
                 features / math_ops.cast(1.4142135623730951, features.dtype)))
+
 
 def cosine_decay_with_warmup(global_step,
                              learning_rate_base,
@@ -125,4 +127,3 @@ class WarmUpCosineDecayScheduler(keras.callbacks.Callback):
         if self.verbose > 0:
             print('\nBatch %05d: setting learning '
                   'rate to %s.' % (self.global_step + 1, lr))
-
