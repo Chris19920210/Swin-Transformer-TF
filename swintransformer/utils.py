@@ -111,12 +111,12 @@ class WarmUpCosineDecayScheduler(keras.callbacks.Callback):
         self.verbose = verbose
         self.learning_rates = []
 
-    def on_batch_end(self, batch, logs=None):
+    def on_train_batch_begin(self, batch, logs=None):
         self.global_step = self.global_step + 1
         lr = K.get_value(self.model.optimizer.lr)
         self.learning_rates.append(lr)
 
-    def on_batch_begin(self, batch, logs=None):
+    def on_train_batch_end(self, batch, logs=None):
         lr = cosine_decay_with_warmup(global_step=self.global_step,
                                       learning_rate_base=self.learning_rate_base,
                                       total_steps=self.total_steps,
