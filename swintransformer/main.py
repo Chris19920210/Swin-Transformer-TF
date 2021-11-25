@@ -106,42 +106,41 @@ def main(_):
                             )
         pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
-        if FLAGS.mode == "eval":
-            model = tf.keras.Sequential([
-                tf.keras.layers.Lambda(
-                    lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
-                                                                                       mode="torch"),
-                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_choice, FLAGS.model_name),
+    if FLAGS.mode == "eval":
+        model = tf.keras.Sequential([
+            tf.keras.layers.Lambda(
+                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
+                                                                                   mode="torch"),
+                input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),                *get_model(FLAGS.model_choice, FLAGS.model_name),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
-            ])
-            label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
-            samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
+        ])
+        label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
+        samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
                                                  batch_size=FLAGS.val_batch_size)
-            model.compile(
-                optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
-                loss='sparse_categorical_crossentropy',
-                metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
-            )
-            print("Evaluate on test data")
-            results = model.evaluate(val_ds)
-            print("test loss, test acc:", results)
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
+            loss='sparse_categorical_crossentropy',
+            metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
+        )
+        print("Evaluate on test data")
+        results = model.evaluate(val_ds)
+        print("test loss, test acc:", results)
 
-        if FLAGS.mode == "infer":
-            model = tf.keras.Sequential([
-                tf.keras.layers.Lambda(
-                    lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
+    if FLAGS.mode == "infer":
+        model = tf.keras.Sequential([
+            tf.keras.layers.Lambda(
+                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
-                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_choice, FLAGS.model_name),
-                tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
-            ])
-            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                           batch_size=FLAGS.val_batch_size)
+                input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
+            *get_model(FLAGS.model_choice, FLAGS.model_name),
+            tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
+        ])
+        _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                         batch_size=FLAGS.val_batch_size)
 
-            inference_results = model.predict(infer_ds)
-            print("Finish inference:", inference_results.shape)
-            np.save(os.path.join(FLAGS.output, "inference_results.npy"), inference_results)
+        inference_results = model.predict(infer_ds)
+        print("Finish inference:", inference_results.shape)
+        np.save(os.path.join(FLAGS.output, "inference_results.npy"), inference_results)
 
 
 if __name__ == "__main__":
