@@ -32,9 +32,9 @@ IMAGE_SIZE = {
 }
 
 
-def get_model(model_path, model_name=""):
+def get_model(model_path, model_name="", pretrained=True):
     if FLAGS.model_choice == "swin":
-        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=True)]
+        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)]
     else:
         return [mobilenet_v2(model_path, include_top=False),
                 tf.keras.layers.GlobalAveragePooling2D()]
@@ -112,9 +112,10 @@ def main(_):
                 lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                    mode="torch"),
                 input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-            *get_model(FLAGS.model_path, FLAGS.model_name),
+            *get_model(FLAGS.model_path, FLAGS.model_name, False),
             tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
         ])
+        model.load_weights(FLAGS.model_path)
         label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
         samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
                                              batch_size=FLAGS.val_batch_size)
