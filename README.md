@@ -5,7 +5,7 @@ Based on [Official Pytorch implementation](https://github.com/microsoft/Swin-Tra
 ![image](https://user-images.githubusercontent.com/24825165/121768619-038e6d80-cb9a-11eb-8cb7-daa827e7772b.png)
 
 ## Requirements
-- `tensorflow == 1.15`
+- `tensorflow == 2.4.1`
 
 ## Pretrained Swin Transformer Checkpoints
 **ImageNet-1K and ImageNet-22K Pretrained Checkpoints**  
