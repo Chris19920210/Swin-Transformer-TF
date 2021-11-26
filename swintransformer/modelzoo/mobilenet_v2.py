@@ -64,6 +64,7 @@ from TensorFlow checkpoints found [here]
 
 # Reference
 
+
 This file contains building code for MobileNetV2, based on
 [MobileNetV2: Inverted Residuals and Linear Bottlenecks]
 (https://arxiv.org/abs/1801.04381) (CVPR 2018)
@@ -82,7 +83,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.api._v1.keras.applications import imagenet_utils
 from tensorflow.python.keras.api._v1.keras.applications.imagenet_utils import decode_predictions
-from tensorflow.python.keras.applications import keras_modules_injection
 
 # TODO Change path to v1.1
 BASE_WEIGHT_PATH = ('https://github.com/JonathanCMitchell/mobilenet_v2_keras/'
@@ -610,6 +610,5 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
     return x
 
 
-@keras_modules_injection
 def mobilenet_v2(*args, **kwargs):
     return MobileNetV2(*args, **kwargs)
