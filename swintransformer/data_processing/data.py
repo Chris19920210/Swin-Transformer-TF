@@ -64,7 +64,7 @@ def distorted_bounding_box_crop(image_bytes,
     Returns:
       cropped image `Tensor`
     """
-    with tf.name_scope(scope, 'distorted_bounding_box_crop', [image_bytes, bbox]):
+    with tf.name_scope('distorted_bounding_box_crop'):
         shape = tf.image.extract_jpeg_shape(image_bytes)
         sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
             shape,
@@ -109,8 +109,7 @@ def _decode_and_random_crop(image_bytes, image_size):
     image = tf.cond(
         bad,
         lambda: _decode_and_center_crop(image_bytes, image_size),
-        lambda: tf.image.resize_bicubic([image],  # pylint: disable=g-long-lambda
-                                        [image_size, image_size])[0])
+        lambda: tf.image.resize([image], [image_size, image_size], method="bicubic")[0])
 
     return image
 
@@ -131,7 +130,7 @@ def _decode_and_center_crop(image_bytes, image_size):
     crop_window = tf.stack([offset_height, offset_width,
                             padded_center_crop_size, padded_center_crop_size])
     image = tf.image.decode_and_crop_jpeg(image_bytes, crop_window, channels=3)
-    image = tf.image.resize_bicubic([image], [image_size, image_size])[0]
+    image = tf.image.resize([image], [image_size, image_size], method="bicubic")[0]
 
     return image
 
@@ -181,7 +180,7 @@ def preprocess_for_train(image_bytes, image_size,
     image = tf.reshape(image, [image_size, image_size, 3])
 
     if augment_name:
-        tf.logging.info('Apply AutoAugment policy %s', augment_name)
+        tf.compat.v1.logging.info('Apply AutoAugment policy %s', augment_name)
         input_image_type = image.dtype
         image = tf.clip_by_value(image, 0.0, 255.0)
         image = tf.cast(image, dtype=tf.uint8)

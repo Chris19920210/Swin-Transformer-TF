@@ -7,7 +7,7 @@ import os
 import numpy as np
 from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler, get_lr_metric
 
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 2, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 128, 'batch size')
