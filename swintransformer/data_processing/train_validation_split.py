@@ -4,7 +4,7 @@ import os
 import numpy as np
 import shutil
 
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 flags.DEFINE_string('input', './input', 'Directory to input.')
 flags.DEFINE_string('output', './output', 'Directory to output. ')
 flags.DEFINE_float('ratio', 0.2, 'ratio')
