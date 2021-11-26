@@ -86,7 +86,8 @@ def main(_):
         steps_per_epoch = samples_num // FLAGS.batch_size
 
         if FLAGS.gpus > 1:
-            model = tf.keras.utils.multi_gpu_model(model, gpus=FLAGS.gpus)
+            from tensorflow.python.keras.utils import multi_gpu_model
+            model = multi_gpu_model(model, gpus=FLAGS.gpus)
 
         # optimizers
 
