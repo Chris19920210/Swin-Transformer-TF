@@ -42,14 +42,24 @@ def get_model(model_path, model_name="", pretrained=True):
 
 def main(_):
     if FLAGS.mode == "train":
-        model = tf.keras.Sequential([
-            tf.keras.layers.Lambda(
-                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
-                                                                                   mode="torch"),
-                input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-            *get_model(FLAGS.model_path, FLAGS.model_name),
-            tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
-        ])
+        device_list = ["/gpu:%d" % i for i in range(FLAGS.gpus)]
+        strategy = tf.distribute.MirroredStrategy(devices=device_list)
+        with strategy.scope():
+            model = tf.keras.Sequential([
+                tf.keras.layers.Lambda(
+                    lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
+                                                                                       mode="torch"),
+                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
+                *get_model(FLAGS.model_path, FLAGS.model_name),
+                tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
+            ])
+            optimizer = tf.keras.optimizers.Adam()
+            lr_metric = get_lr_metric(optimizer)
+            model.compile(
+                optimizer=optimizer,
+                loss='sparse_categorical_crossentropy',
+                metrics=["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]
+            )
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
 
         # load data
@@ -84,22 +94,6 @@ def main(_):
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
         steps_per_epoch = samples_num // FLAGS.batch_size
-
-        if FLAGS.gpus > 1:
-            from tensorflow.python.keras.utils import multi_gpu_model
-            model = multi_gpu_model(model, gpus=FLAGS.gpus)
-
-        # optimizers
-
-        optimizer = tf.keras.optimizers.Adam()
-
-        lr_metric = get_lr_metric(optimizer)
-
-        model.compile(
-            optimizer=optimizer,
-            loss='sparse_categorical_crossentropy',
-            metrics=["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]
-        )
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
                             validation_data=val_ds, callbacks=callbacks,
