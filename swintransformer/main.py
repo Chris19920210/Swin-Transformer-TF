@@ -63,18 +63,27 @@ def main(_):
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
 
         # load data
+        batch_size = FLAGS.batch_size * strategy.num_replicas_in_sync
+        val_batch_size = FLAGS.val_batch_size * strategy.num_replicas_in_sync
         samples_num, label_to_index, train_ds = train_dataset(FLAGS.train_data_dir,
                                                               IMAGE_SIZE[FLAGS.model_choice],
-                                                              batch_size=FLAGS.batch_size)
+                                                              batch_size=batch_size)
+
         _, _, val_ds = val_dataset(FLAGS.val_data_dir,
                                    IMAGE_SIZE[FLAGS.model_choice],
                                    label_to_index,
-                                   batch_size=FLAGS.val_batch_size)
+                                   batch_size=val_batch_size)
+
+        options = tf.data.Options()
+        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
+
+        train_ds = train_ds.with_options(options)
+        val_ds = val_ds.with_options(options)
 
         # lr schedule
-        total_steps = int(FLAGS.epochs * samples_num / FLAGS.batch_size)
+        total_steps = int(FLAGS.epochs * samples_num / batch_size)
 
-        warmup_steps = int(FLAGS.warmup_epochs * samples_num / FLAGS.batch_size)
+        warmup_steps = int(FLAGS.warmup_epochs * samples_num / batch_size)
 
         warm_up_lr = WarmUpCosineDecayScheduler(learning_rate_base=FLAGS.learning_rate,
                                                 total_steps=total_steps,
