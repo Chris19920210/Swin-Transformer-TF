@@ -102,7 +102,7 @@ def main(_):
 
         pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
 
-        steps_per_epoch = samples_num // FLAGS.batch_size
+        steps_per_epoch = samples_num // batch_size
 
         history = model.fit(train_ds, epochs=FLAGS.epochs,
                             validation_data=val_ds, callbacks=callbacks,
