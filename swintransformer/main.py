@@ -124,6 +124,8 @@ def main(_):
         label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
         samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
                                              batch_size=FLAGS.val_batch_size)
+        model.save(FLAGS.output, include_optimizer=False)
+        print("Model save without optimizer, Done!")
         model.compile(
             optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
             loss='sparse_categorical_crossentropy',
@@ -132,19 +134,9 @@ def main(_):
         print("Evaluate on test data")
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
-        model.save(FLAGS.output, include_optimizer=False)
-        print("Model save without optimizer, Done!")
 
     if FLAGS.mode == "infer":
-        model = tf.keras.Sequential([
-            tf.keras.layers.Lambda(
-                lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
-                                                                                   mode="torch"),
-                input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-            *get_model(FLAGS.model_path, FLAGS.model_name, False),
-            tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
-        ])
-        model.load_weights(FLAGS.model_path)
+        model = tf.keras.models.load_model(FLAGS.model_path, compile=False)
         _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
                                        batch_size=FLAGS.val_batch_size)
 
