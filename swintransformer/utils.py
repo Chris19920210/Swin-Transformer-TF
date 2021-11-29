@@ -5,6 +5,7 @@ from tensorflow.keras import backend as K
 import numpy as np
 import pickle as pkl
 
+
 def top3_acc(labels, logits):
     return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=3)
 
