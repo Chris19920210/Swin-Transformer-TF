@@ -132,4 +132,23 @@ class WarmUpCosineDecayScheduler(keras.callbacks.Callback):
 def get_lr_metric(optimizer):
     def lr(y_true, y_pred):
         return optimizer.lr
+
     return lr
+
+
+class EvalPerClass(object):
+    def __init__(self, labels_to_index):
+        self.labels = sorted(labels_to_index, key=lambda key: labels_to_index[key])
+        self.sample_accu = np.zeros(len(self.labels))
+        self.class_accu = np.zeros(len(self.labels))
+
+    def __call__(self, y_true, y_pred):
+        for true, pred in zip(y_true, y_pred):
+            self.sample_accu[true] += 1
+            if true == pred:
+                self.class_accu[true] += 1
+
+    def eval(self):
+        acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
+        for label, acc in zip(self.labels, acc_per_class):
+            print("label:%s, acc:%.2f" % (label, acc))

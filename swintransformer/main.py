@@ -5,7 +5,7 @@ from modelzoo.mobilenet_v2 import mobilenet_v2
 import pickle as pkl
 import os
 import numpy as np
-from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler, get_lr_metric
+from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler, get_lr_metric, EvalPerClass
 
 flags = tf.compat.v1.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
@@ -24,6 +24,7 @@ flags.DEFINE_string('label_to_index', './label_to_index.pkl', 'Directory to save
 flags.DEFINE_integer('warmup_epochs', 10, 'Directory to save model.')
 flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 flags.DEFINE_integer('gpus', 1, 'nums of gpus')
+flags.DEFINE_boolean('eval_per_class', True, 'whether evaluate per class')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -132,11 +133,18 @@ def main(_):
             metrics=["sparse_categorical_accuracy", top3_acc, top5_acc]
         )
         print("Evaluate on test data")
+
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
+        if FLAGS.eval_per_class:
+            per_class_evaluator = EvalPerClass(label_to_index)
+            for x_test, y_test in val_ds.as_numpy_iterator():
+                y_pred = model.predict_classes(x_test)
+                per_class_evaluator(y_test, y_pred)
+            per_class_evaluator.eval()
 
     if FLAGS.mode == "infer":
-        model = tf.keras.models.load_model(FLAGS.model_path, compile=False)
+        model = tf.keras.models.load_model(FLAGS.model_path)
         _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
                                        batch_size=FLAGS.val_batch_size)
 
