@@ -18,6 +18,74 @@ Based on [Official Pytorch implementation](https://github.com/microsoft/Swin-Tra
 |`swin_large_224`|ImageNet-22K|224x224|86.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_224.tgz)|
 |`swin_large_384`|ImageNet-22K|384x384|87.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_384.tgz)|
 
+## Inference Demo
+```python
+import tensorflow as tf
+import pickle as pkl
+from PIL import Image
+import numpy as np
+
+## show demo image
+image = Image.open('topic_model/demo.jpeg')
+image.show()
+
+## load model
+model = tf.keras.models.load_model('topic_model/')
+
+## load image
+IMAGE_SIZE = 224
+CROP_PADDING = 32
+def _decode_and_center_crop(image_bytes, image_size):
+    """Crops to center of image with padding then scales image_size."""
+    shape = tf.image.extract_jpeg_shape(image_bytes)
+    image_height = shape[0]
+    image_width = shape[1]
+
+    padded_center_crop_size = tf.cast(
+        ((image_size / (image_size + CROP_PADDING)) *
+         tf.cast(tf.minimum(image_height, image_width), tf.float32)),
+        tf.int32)
+
+    offset_height = ((image_height - padded_center_crop_size) + 1) // 2
+    offset_width = ((image_width - padded_center_crop_size) + 1) // 2
+    crop_window = tf.stack([offset_height, offset_width,
+                            padded_center_crop_size, padded_center_crop_size])
+    image = tf.image.decode_and_crop_jpeg(image_bytes, crop_window, channels=3)
+    image = tf.image.resize([image], [image_size, image_size], method="bicubic")[0]
+
+    return image
+
+def preprocess_for_eval(image_bytes, image_size):
+    """Preprocesses the given image for evaluation.
+    Args:
+      image_bytes: `Tensor` representing an image binary of arbitrary size.
+      use_bfloat16: `bool` for whether to use bfloat16.
+      image_size: image size.
+    Returns:
+      A preprocessed image `Tensor`.
+    """
+    image = _decode_and_center_crop(image_bytes, image_size)
+    image = tf.reshape(image, [image_size, image_size, 3])
+    return image
+
+def load_and_preprocess_image(path, image_size):
+    image = tf.io.read_file(path)
+    return preprocess_for_eval(image, image_size)
+
+image = load_and_preprocess_image('topic_model/demo.jpeg', image_size=IMAGE_SIZE)
+## with batch size
+image = tf.expand_dims(image, axis=0)
+
+## load label
+label_to_index = pkl.load(open('topic_model/label_to_index.pkl', 'rb'))
+labels = sorted(label_to_index, key=lambda key: label_to_index[key])
+
+## predict
+result = model.predict(image)
+label = np.argmax(result, axis=-1)
+print(labels[label[0]])
+```
+
 ## Examples
 Initializing the model:
 ```python
@@ -56,3 +124,4 @@ Example: [TPU training on Kaggle](https://www.kaggle.com/rishigami/tpu-swin-tran
   journal={arXiv preprint arXiv:2103.14030},
   year={2021}
 }
+

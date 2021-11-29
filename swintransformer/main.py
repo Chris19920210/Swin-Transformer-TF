@@ -139,7 +139,7 @@ def main(_):
             for i, (x_test, y_test) in enumerate(val_ds.as_numpy_iterator()):
                 y_pred = model.predict_classes(x_test)
                 per_class_evaluator(y_test, y_pred)
-                if i % 100 == 0:
+                if i % 10 == 0:
                     per_class_evaluator.eval('Eval after %d iter' % i)
             per_class_evaluator.eval('Final')
 
