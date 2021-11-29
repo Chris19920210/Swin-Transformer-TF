@@ -120,6 +120,7 @@ def main(_):
             tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
         ])
         model.load_weights(FLAGS.model_path)
+        tf.keras.backend.set_learning_phase(0)
         label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
         samples_num, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice], label_to_index,
                                              batch_size=FLAGS.val_batch_size)
@@ -131,6 +132,8 @@ def main(_):
         print("Evaluate on test data")
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
+        model.save(FLAGS.output, include_optimizer=False)
+        print("Model save without optimizer, Done!")
 
     if FLAGS.mode == "infer":
         model = tf.keras.Sequential([
