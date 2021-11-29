@@ -134,14 +134,17 @@ def main(_):
         )
         print("Evaluate on test data")
 
-        results = model.evaluate(val_ds)
-        print("test loss, test acc:", results)
         if FLAGS.eval_per_class:
             per_class_evaluator = EvalPerClass(label_to_index)
-            for x_test, y_test in val_ds.as_numpy_iterator():
+            for i, (x_test, y_test) in enumerate(val_ds.as_numpy_iterator()):
                 y_pred = model.predict_classes(x_test)
                 per_class_evaluator(y_test, y_pred)
-            per_class_evaluator.eval()
+                if i % 100 == 0:
+                    per_class_evaluator.eval('Eval after %d iter' % i)
+            per_class_evaluator.eval('Final')
+
+        results = model.evaluate(val_ds)
+        print("test loss, test acc:", results)
 
     if FLAGS.mode == "infer":
         model = tf.keras.models.load_model(FLAGS.model_path)

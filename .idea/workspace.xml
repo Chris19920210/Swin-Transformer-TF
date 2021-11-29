@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="save model properly">
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="eval per class">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/utils.py" afterDir="false" />
@@ -239,7 +239,14 @@
       <option name="project" value="LOCAL" />
       <updated>1638162687094</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="eval per class">
+      <created>1638167398611</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1638167398611</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -298,7 +305,8 @@
     <MESSAGE value="compatible" />
     <MESSAGE value="save model" />
     <MESSAGE value="save model properly" />
-    <option name="LAST_COMMIT_MESSAGE" value="save model properly" />
+    <MESSAGE value="eval per class" />
+    <option name="LAST_COMMIT_MESSAGE" value="eval per class" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

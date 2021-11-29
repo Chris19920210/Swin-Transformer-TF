@@ -148,7 +148,8 @@ class EvalPerClass(object):
             if true == pred:
                 self.class_accu[true] += 1
 
-    def eval(self):
+    def eval(self, stage):
         acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
-        for label, acc in zip(self.labels, acc_per_class):
-            print("label:%s, acc:%.2f" % (label, acc))
+        print(stage)
+        for label, acc, cnt in zip(self.labels, acc_per_class, self.sample_accu):
+            print("label:%s, acc:%.4f, sample_num:%d" % (label, acc, cnt))
