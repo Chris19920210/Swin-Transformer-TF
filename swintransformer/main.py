@@ -135,13 +135,17 @@ def main(_):
         print("Evaluate on test data")
 
         if FLAGS.eval_per_class:
+            samples_num, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                            label_to_index,
+                                                            batch_size=FLAGS.val_batch_size, tracer=True)
             per_class_evaluator = EvalPerClass(label_to_index)
-            for i, (x_test, y_test) in enumerate(val_ds.as_numpy_iterator()):
+            for i, (x_test, y_test, path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
                 y_pred = model.predict_classes(x_test)
-                per_class_evaluator(y_test, y_pred)
+                per_class_evaluator(y_test, y_pred, path)
                 if i % 10 == 0:
                     per_class_evaluator.eval('Eval after %d iter' % i)
             per_class_evaluator.eval('Final')
+            per_class_evaluator.save_trace(os.path.join(FLAGS.output, "tracer.pkl"))
 
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)

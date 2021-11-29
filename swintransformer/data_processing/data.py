@@ -201,9 +201,9 @@ def train_dataset(data_root, image_size, is_training=True,
                         augment_name=augment_name, batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def val_dataset(data_root, image_size, label_to_index, batch_size=128, shuffle=False):
+def val_dataset(data_root, image_size, label_to_index, batch_size=128, shuffle=False, tracer=False):
     return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, is_training=False,
-                        batch_size=batch_size, shuffle=shuffle, with_label=True, repeat=False)
+                        batch_size=batch_size, shuffle=shuffle, with_label=True, repeat=False, tracer=tracer)
 
 
 def infer_dataset(data_root, image_size, batch_size=128, shuffle=True):
@@ -214,7 +214,7 @@ def infer_dataset(data_root, image_size, batch_size=128, shuffle=True):
 def load_dataset(data_root,
                  image_size, label_to_index=None,
                  is_training=False, augment_name=None, batch_size=128,
-                 shuffle=True, with_label=True, repeat=True):
+                 shuffle=True, with_label=True, repeat=True, tracer=False):
     data_root = pathlib.Path(data_root)
     if with_label:
         all_image_paths = list(data_root.glob('*/*'))
@@ -229,15 +229,26 @@ def load_dataset(data_root,
 
         ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels))
 
-        ds = ds.map(lambda image_path, image_label:
-                    load_and_preprocess_from_path_label(image_path, image_label, image_size, is_training=is_training,
-                                                        augment_name=augment_name))
+        if not tracer:
+            ds = ds.map(lambda image_path, image_label:
+                        load_and_preprocess_from_path_label(image_path, image_label, image_size,
+                                                            is_training=is_training,
+                                                            augment_name=augment_name))
+        else:
+            ds = ds.map(lambda image_path, image_label:
+                        (*load_and_preprocess_from_path_label(image_path, image_label, image_size,
+                                                              is_training=is_training,
+                                                              augment_name=augment_name), image_path))
     else:
         all_image_paths = list(data_root.glob('*/'))
         all_image_paths = [str(path) for path in all_image_paths]
         ds = tf.data.Dataset.from_tensor_slices(all_image_paths)
-        ds = ds.map(lambda image_path: load_and_preprocess_image(image_path, image_size, is_training=is_training,
-                                                                 augment_name=augment_name))
+        if not tracer:
+            ds = ds.map(lambda image_path: load_and_preprocess_image(image_path, image_size, is_training=is_training,
+                                                                     augment_name=augment_name))
+        else:
+            ds = ds.map(lambda image_path: (load_and_preprocess_image(image_path, image_size, is_training=is_training,
+                                                                      augment_name=augment_name), image_path))
 
     if shuffle:
         image_count = len(all_image_paths)

@@ -3,7 +3,7 @@ from tensorflow.python.framework import ops
 from tensorflow import keras
 from tensorflow.keras import backend as K
 import numpy as np
-
+import pickle as pkl
 
 def top3_acc(labels, logits):
     return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=3)
@@ -141,15 +141,35 @@ class EvalPerClass(object):
         self.labels = sorted(labels_to_index, key=lambda key: labels_to_index[key])
         self.sample_accu = np.zeros(len(self.labels))
         self.class_accu = np.zeros(len(self.labels))
+        self.tracer_list = [[]]*len(self.labels)
 
-    def __call__(self, y_true, y_pred):
-        for true, pred in zip(y_true, y_pred):
-            self.sample_accu[true] += 1
-            if true == pred:
-                self.class_accu[true] += 1
+    def __call__(self, y_true, y_pred, paths=None):
+        if paths is None:
+            for true, pred in zip(y_true, y_pred):
+                self.sample_accu[true] += 1
+                if true == pred:
+                    self.class_accu[true] += 1
+        else:
+            for true, pred, path in zip(y_true, y_pred, paths):
+                self.sample_accu[true] += 1
+                if true == pred:
+                    self.class_accu[true] += 1
+                self.tracer(true, pred, path)
 
     def eval(self, stage):
         acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
         print(stage)
         for label, acc, cnt in zip(self.labels, acc_per_class, self.sample_accu):
             print("label:%s, acc:%.4f, sample_num:%d" % (label, acc, cnt))
+
+    def tracer(self, true, pred, path):
+        if true != pred:
+            self.tracer_list[true].append(path)
+
+    def save_trace(self, output_path):
+        trace_result = {}
+        for i, label in enumerate(self.labels):
+            trace_result[label] = self.tracer_list[i]
+        pkl.dump(trace_result, open(output_path, "wb"))
+
+
