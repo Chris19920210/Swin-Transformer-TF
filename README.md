@@ -85,6 +85,25 @@ result = model.predict(image)
 label = np.argmax(result, axis=-1)
 print(labels[label[0]])
 ```
+## Offline Train/Eval
+```shell
+# train
+python main.py --model_path path_to_pretrained_ckpt \\ #e.g. "./swin_tiny_224.ckpt" 
+       --model_name swin_tiny_224 \\
+       --train_data_dir train_data_dir  \\ # one class one directory, dirname and class name is one-one mapping. 
+       --val_data_dir test_data_dir \\ # one class one directory, dirname and class name is one-one mapping.
+       --output output_dir \\  # save model, each ckpt is named by its corresponding epoch, 
+       # save class-name -> class-index mapping which used to encode class-name to categorical index
+       --num_classes 8 --batch_size 16  --epochs 300 --model_choice swin --learning_rate 0.001 --gpus 2 --warmup_epochs 10
+# eval
+python main.py --model_path path_to_trained_ckpt \\ #e.g. "./0288/swin_tiny_224.ckpt" 
+       --label_to_index  path_to_class_name_to_class_index_pkl \\ # (i.e. dumped in training, 
+       # class-name -> class-index mapping, e.g. ./label_to_index.pkl) 
+       --output  path_to_output_the_final_model \\ # which remove params related to optimizer 
+       --mode "eval" \\
+       --val_data_dir test_data_dir \\  # one class one directory, dirname and class name is one-one mapping.
+       --model_name swin_tiny_224  --num_classes 8  --val_batch_size 128 --model_choice swin
+```
 
 ## Examples
 Initializing the model:
