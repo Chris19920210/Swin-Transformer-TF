@@ -14,19 +14,6 @@ def top5_acc(labels, logits):
     return keras.metrics.sparse_top_k_categorical_accuracy(y_true=labels, y_pred=logits, k=5)
 
 
-def gelu(features, approximate=False, name=None):
-    with ops.name_scope(name, "Gelu", [features]):
-        features = ops.convert_to_tensor(features, name="features")
-        if approximate:
-            coeff = math_ops.cast(0.044715, features.dtype)
-            return 0.5 * features * (
-                    1.0 + math_ops.tanh(0.7978845608028654 *
-                                        (features + coeff * math_ops.pow(features, 3))))
-        else:
-            return 0.5 * features * (1.0 + math_ops.erf(
-                features / math_ops.cast(1.4142135623730951, features.dtype)))
-
-
 def cosine_decay_with_warmup(global_step,
                              learning_rate_base,
                              total_steps,
@@ -142,7 +129,7 @@ class EvalPerClass(object):
         self.labels = sorted(labels_to_index, key=lambda key: labels_to_index[key])
         self.sample_accu = np.zeros(len(self.labels))
         self.class_accu = np.zeros(len(self.labels))
-        self.tracer_list = [[]]*len(self.labels)
+        self.tracer_list = [[]] * len(self.labels)
 
     def __call__(self, y_true, y_pred, paths=None):
         if paths is None:
@@ -172,5 +159,3 @@ class EvalPerClass(object):
         for i, label in enumerate(self.labels):
             trace_result[label] = self.tracer_list[i]
         pkl.dump(trace_result, open(output_path, "wb"))
-
-

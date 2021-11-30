@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D
-from utils import gelu
 
 CFGS = {
     'swin_tiny_224': dict(input_size=(224, 224), window_size=7, embed_dim=96, depths=[2, 2, 6, 2],
@@ -30,7 +29,7 @@ class Mlp(tf.keras.layers.Layer):
 
     def call(self, x):
         x = self.fc1(x)
-        x = gelu(x)
+        x = tf.keras.activations.gelu(x)
         x = self.drop(x)
         x = self.fc2(x)
         x = self.drop(x)
