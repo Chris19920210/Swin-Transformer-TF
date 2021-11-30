@@ -25,6 +25,7 @@ flags.DEFINE_integer('warmup_epochs', 10, 'Directory to save model.')
 flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 flags.DEFINE_integer('gpus', 1, 'nums of gpus')
 flags.DEFINE_boolean('eval_per_class', True, 'whether evaluate per class')
+flags.DEFINE_string('mapping', None, 'path to mapping')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -138,7 +139,11 @@ def main(_):
             samples_num, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
                                                             label_to_index,
                                                             batch_size=FLAGS.val_batch_size, tracer=True)
-            per_class_evaluator = EvalPerClass(label_to_index)
+            if FLAGS.mapping is not None:
+                mapping = pkl.load(open(FLAGS.mapping, "rb"))
+                per_class_evaluator = EvalPerClass(label_to_index, mapping=mapping)
+            else:
+                per_class_evaluator = EvalPerClass(label_to_index)
             for i, (x_test, y_test, path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
                 y_pred = model.predict_classes(x_test)
                 per_class_evaluator(y_test, y_pred, path)

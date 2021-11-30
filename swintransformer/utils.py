@@ -125,8 +125,14 @@ def get_lr_metric(optimizer):
 
 
 class EvalPerClass(object):
-    def __init__(self, labels_to_index):
+    def __init__(self, labels_to_index, mapping=None):
         self.labels = sorted(labels_to_index, key=lambda key: labels_to_index[key])
+        self.mapping = mapping
+        if mapping is not None:
+            self.mapping_to_index = {k: i for i, k in enumerate(set(self.mapping.values()))}
+            self.id_mapping_with_idx = [self.mapping_to_index[self.mapping[key]] for key in self.labels]
+            self.labels = sorted(self.mapping_to_index, key=lambda key: self.mapping_to_index[key])
+
         self.sample_accu = np.zeros(len(self.labels))
         self.class_accu = np.zeros(len(self.labels))
         self.tracer_list = [[]] * len(self.labels)
@@ -134,15 +140,23 @@ class EvalPerClass(object):
     def __call__(self, y_true, y_pred, paths=None):
         if paths is None:
             for true, pred in zip(y_true, y_pred):
-                self.sample_accu[true] += 1
-                if true == pred:
-                    self.class_accu[true] += 1
+                if self.mapping is not None:
+                    true = self.id_mapping_with_idx[true]
+                    pred = self.id_mapping_with_idx[pred]
+                self.acc(true, pred)
         else:
             for true, pred, path in zip(y_true, y_pred, paths):
-                self.sample_accu[true] += 1
-                if true == pred:
-                    self.class_accu[true] += 1
-                self.tracer(true, pred, path)
+                if self.mapping is not None:
+                    true = self.id_mapping_with_idx[true]
+                    pred = self.id_mapping_with_idx[pred]
+                self.acc(true, pred, path)
+
+    def acc(self, true, pred, path=None):
+        self.sample_accu[true] += 1
+        if true == pred:
+            self.class_accu[true] += 1
+        if path is not None:
+            self.tracer(true, pred, path)
 
     def eval(self, stage):
         acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
