@@ -161,7 +161,8 @@ class EvalPerClass(object):
     def eval(self, stage):
         acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
         print(stage)
-        print('In total Acc:%.4f' % (sum(self.class_accu) / (sum(self.sample_accu) + 1e-6)))
+        print('In total Acc:%.4f, Total Sample num :%d' % (sum(self.class_accu) / (sum(self.sample_accu) + 1e-6),
+                                                           int(sum(self.sample_accu))))
         for label, acc, cnt in zip(self.labels, acc_per_class, self.sample_accu):
             print("label:%s, acc:%.4f, sample_num:%d" % (label, acc, cnt))
 
