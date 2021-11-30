@@ -165,7 +165,7 @@ class EvalPerClass(object):
 
     def tracer(self, true, pred, path):
         if true != pred:
-            self.tracer_list[true].append(path)
+            self.tracer_list[true].append(path.decode("utf-8"))
 
     def save_trace(self, output_path):
         trace_result = {}
