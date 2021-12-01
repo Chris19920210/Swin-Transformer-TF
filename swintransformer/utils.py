@@ -135,7 +135,7 @@ class EvalPerClass(object):
 
         self.sample_accu = np.zeros(len(self.labels))
         self.class_accu = np.zeros(len(self.labels))
-        self.tracer_list = [[]] * len(self.labels)
+        self.tracer_list = [[] for _ in range(len(self.labels))]
 
     def __call__(self, y_true, y_pred, paths=None):
         if paths is None:
