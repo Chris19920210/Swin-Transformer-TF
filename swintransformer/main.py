@@ -6,6 +6,8 @@ import pickle as pkl
 import os
 import numpy as np
 from utils import top3_acc, top5_acc, WarmUpCosineDecayScheduler, get_lr_metric, EvalPerClass
+from SparseCategoricalFocalLoss import SparseCategoricalFocalLoss
+from tensorflow.keras.losses import SparseCategoricalCrossentropy
 
 flags = tf.compat.v1.flags
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
@@ -26,6 +28,7 @@ flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 flags.DEFINE_integer('gpus', 1, 'nums of gpus')
 flags.DEFINE_boolean('eval_per_class', True, 'whether evaluate per class')
 flags.DEFINE_string('mapping', None, 'path to mapping')
+flags.DEFINE_boolean('focal', True, 'whether use focal loss')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -59,7 +62,7 @@ def main(_):
             lr_metric = get_lr_metric(optimizer)
             model.compile(
                 optimizer=optimizer,
-                loss='sparse_categorical_crossentropy',
+                loss= SparseCategoricalFocalLoss(gamma=2) if FLAGS.focal else SparseCategoricalCrossentropy(),
                 metrics=["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]
             )
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
