@@ -62,7 +62,7 @@ def main(_):
             lr_metric = get_lr_metric(optimizer)
             model.compile(
                 optimizer=optimizer,
-                loss= SparseCategoricalFocalLoss(gamma=2) if FLAGS.focal else SparseCategoricalCrossentropy(),
+                loss=SparseCategoricalFocalLoss(gamma=2) if FLAGS.focal else SparseCategoricalCrossentropy(),
                 metrics=["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]
             )
         checkpoint_path = "%s/{epoch:04d}/%s.ckpt" % (FLAGS.output, FLAGS.model_name)
