@@ -127,8 +127,8 @@ class WindowAttention(tf.keras.layers.Layer):
         return x
 
 
-def drop_path(inputs, drop_prob, is_training):
-    if (not is_training) or (drop_prob == 0.):
+def drop_path(inputs, drop_prob):
+    if drop_prob == 0.:
         return inputs
 
     # Compute keep_prob
@@ -149,14 +149,14 @@ class DropPath(tf.keras.layers.Layer):
         super().__init__()
         self.drop_prob = drop_prob
 
-    def call(self, x, training=None):
-        return drop_path(x, self.drop_prob, training)
+    def call(self, x):
+        return drop_path(x, self.drop_prob)
 
 
 class SwinTransformerBlock(tf.keras.layers.Layer):
     def __init__(self, dim, input_resolution, num_heads, window_size=7, shift_size=0, mlp_ratio=4.,
                  qkv_bias=True, qk_scale=None, drop=0., attn_drop=0., drop_path_prob=0., norm_layer=LayerNormalization,
-                 is_training=False, prefix=''):
+                 prefix=''):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -169,7 +169,6 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
             self.window_size = min(self.input_resolution)
         assert 0 <= self.shift_size < self.window_size, "shift_size must in 0-window_size"
         self.prefix = prefix
-        self.is_training = is_training
 
         self.norm1 = norm_layer(epsilon=1e-5, name=f'{self.prefix}/norm1')
         self.attn = WindowAttention(dim, window_size=(self.window_size, self.window_size), num_heads=num_heads,
@@ -251,8 +250,8 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         x = tf.reshape(x, shape=[-1, H * W, C])
 
         # FFN
-        x = shortcut + self.drop_path(x, self.is_training)
-        x = x + self.drop_path(self.mlp(self.norm2(x)), self.is_training)
+        x = shortcut + self.drop_path(x)
+        x = x + self.drop_path(self.mlp(self.norm2(x)))
 
         return x
 
@@ -290,8 +289,7 @@ class PatchMerging(tf.keras.layers.Layer):
 class BasicLayer(tf.keras.layers.Layer):
     def __init__(self, dim, input_resolution, depth, num_heads, window_size,
                  mlp_ratio=4., qkv_bias=True, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path_prob=0., norm_layer=LayerNormalization, downsample=None, use_checkpoint=False,
-                 is_training=False, prefix=''):
+                 drop_path_prob=0., norm_layer=LayerNormalization, downsample=None, use_checkpoint=False, prefix=''):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
@@ -308,7 +306,7 @@ class BasicLayer(tf.keras.layers.Layer):
                                                                 drop=drop, attn_drop=attn_drop,
                                                                 drop_path_prob=drop_path_prob[i] if isinstance(
                                                                     drop_path_prob, list) else drop_path_prob,
-                                                                norm_layer=norm_layer, is_training=is_training,
+                                                                norm_layer=norm_layer,
                                                                 prefix=f'{prefix}/blocks{i}') for i in range(depth)])
         if downsample is not None:
             self.downsample = downsample(
@@ -363,7 +361,7 @@ class SwinTransformerModel(tf.keras.Model):
                  window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=LayerNormalization, ape=False, patch_norm=True,
-                 use_checkpoint=False, is_training=False, **kwargs):
+                 use_checkpoint=False, **kwargs):
         super().__init__(name=model_name)
 
         self.include_top = include_top
@@ -411,7 +409,7 @@ class SwinTransformerModel(tf.keras.Model):
                                                             norm_layer=norm_layer,
                                                             downsample=PatchMerging if (
                                                                     i_layer < self.num_layers - 1) else None,
-                                                            use_checkpoint=use_checkpoint, is_training=is_training,
+                                                            use_checkpoint=use_checkpoint,
                                                             prefix=f'layers{i_layer}') for i_layer in
                                                  range(self.num_layers)])
         self.norm = norm_layer(epsilon=1e-5, name='norm')
@@ -440,13 +438,13 @@ class SwinTransformerModel(tf.keras.Model):
 
 
 def SwinTransformer(model_path, model_name='swin_tiny_224', num_classes=1000, include_top=True, pretrained=True,
-                    use_tpu=False, drop_rate=0., attn_drop_rate=0., is_training=False, cfgs=CFGS):
+                    use_tpu=False, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., cfgs=CFGS):
     cfg = cfgs[model_name]
     net = SwinTransformerModel(
         model_name=model_name, include_top=include_top, num_classes=num_classes, img_size=cfg['input_size'],
         window_size=cfg[
             'window_size'], embed_dim=cfg['embed_dim'], depths=cfg['depths'], num_heads=cfg['num_heads'],
-        drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, is_training=is_training
+        drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate
     )
     net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
     if pretrained is True:
