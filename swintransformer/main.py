@@ -43,7 +43,7 @@ def get_model(model_path, model_name="", pretrained=True, is_training=False):
             return [SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)]
         else:
             return [SwinTransformer(model_path, model_name, include_top=False, drop_rate=0.1,
-                                    attn_drop_rate=0.1, pretrained=pretrained)]
+                                    attn_drop_rate=0.1, drop_path_rate=0.1,  pretrained=pretrained)]
     else:
         return [mobilenet_v2(model_path, include_top=False),
                 tf.keras.layers.GlobalAveragePooling2D()]
