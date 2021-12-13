@@ -37,9 +37,13 @@ IMAGE_SIZE = {
 }
 
 
-def get_model(model_path, model_name="", pretrained=True):
+def get_model(model_path, model_name="", pretrained=True, is_training=False):
     if FLAGS.model_choice == "swin":
-        return [SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)]
+        if not is_training:
+            return [SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)]
+        else:
+            return [SwinTransformer(model_path, model_name, include_top=False, is_training=True, drop_rate=0.1,
+                                    attn_drop_rate=0.1, pretrained=pretrained)]
     else:
         return [mobilenet_v2(model_path, include_top=False),
                 tf.keras.layers.GlobalAveragePooling2D()]

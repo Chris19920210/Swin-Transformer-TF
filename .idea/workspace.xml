@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="with focal loss">
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="format">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/swintransformer/modelzoo/swin_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/modelzoo/swin_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -336,7 +337,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639120355698</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="format">
+      <created>1639120835588</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1639120835588</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -399,12 +407,12 @@
     <MESSAGE value="tiny change" />
     <MESSAGE value="predict demo" />
     <MESSAGE value="readme" />
-    <MESSAGE value="format" />
     <MESSAGE value="small change" />
     <MESSAGE value="mapping" />
     <MESSAGE value="bug fix" />
     <MESSAGE value="with focal loss" />
-    <option name="LAST_COMMIT_MESSAGE" value="with focal loss" />
+    <MESSAGE value="format" />
+    <option name="LAST_COMMIT_MESSAGE" value="format" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
