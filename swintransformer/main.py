@@ -59,7 +59,7 @@ def main(_):
                     lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
                                                                                        mode="torch"),
                     input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_path, FLAGS.model_name),
+                *get_model(FLAGS.model_path, FLAGS.model_name, is_training=True),
                 tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
             ])
             optimizer = tf.keras.optimizers.Adam()
