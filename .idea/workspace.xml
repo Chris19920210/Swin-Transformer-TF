@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="dropout">
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="fix">
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -370,7 +370,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639395515483</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="fix">
+      <created>1639395578213</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1639395578213</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -439,7 +446,8 @@
     <MESSAGE value="with focal loss" />
     <MESSAGE value="format" />
     <MESSAGE value="dropout" />
-    <option name="LAST_COMMIT_MESSAGE" value="dropout" />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -29,6 +29,7 @@ flags.DEFINE_integer('gpus', 1, 'nums of gpus')
 flags.DEFINE_boolean('eval_per_class', True, 'whether evaluate per class')
 flags.DEFINE_string('mapping', None, 'path to mapping')
 flags.DEFINE_boolean('focal', True, 'whether use focal loss')
+flags.DEFINE_float('dropout', 0., "dropout rate")
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -42,8 +43,8 @@ def get_model(model_path, model_name="", pretrained=True, is_training=False):
         if not is_training:
             return [SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)]
         else:
-            return [SwinTransformer(model_path, model_name, include_top=False, drop_rate=0.1,
-                                    attn_drop_rate=0.1, drop_path_rate=0.1,  pretrained=pretrained)]
+            return [SwinTransformer(model_path, model_name, include_top=False, drop_rate=FLAGS.dropout,
+                                    attn_drop_rate=FLAGS.dropout, drop_path_rate=FLAGS.dropout,  pretrained=pretrained)]
     else:
         return [mobilenet_v2(model_path, include_top=False),
                 tf.keras.layers.GlobalAveragePooling2D()]
