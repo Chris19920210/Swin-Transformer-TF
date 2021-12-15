@@ -197,8 +197,8 @@ class EvalPerClass(object):
         pkl.dump(prob_trace_result, open(output_path, "wb"))
 
 
-def get_multi_tasks_model(inputs, layers, num_classes_task1, num_classes_task2):
-    task_1 = tf.keras.layers.Dense(num_classes_task1, activation='softmax')(layers)
-    task_2 = tf.keras.layers.Dense(num_classes_task2, activation='softmax')(layers)
+def get_multi_tasks_model(inputs, model, num_classes_task1, num_classes_task2):
+    task_1 = tf.keras.layers.Dense(num_classes_task1, activation='softmax')(model.output)
+    task_2 = tf.keras.layers.Dense(num_classes_task2, activation='softmax')(model.output)
     model = keras.Model(inputs=inputs, outputs=[task_1, task_2])
     return model
