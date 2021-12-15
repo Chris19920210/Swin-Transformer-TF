@@ -154,11 +154,10 @@ class EvalPerClass(object):
                     self.acc(true, pred, path)
             else:
                 for true, pred, path, y_prob in zip(y_true, y_pred, paths, probs):
-                    for true, pred, path in zip(y_true, y_pred, paths):
-                        if self.mapping is not None:
-                            true = self.id_mapping_with_idx[true]
-                            pred = self.id_mapping_with_idx[pred]
-                        self.acc(true, pred, path, y_prob)
+                    if self.mapping is not None:
+                        true = self.id_mapping_with_idx[true]
+                        pred = self.id_mapping_with_idx[pred]
+                    self.acc(true, pred, path, y_prob)
 
     def acc(self, true, pred, path=None, y_prob=None):
         self.sample_accu[true] += 1
