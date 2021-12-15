@@ -29,6 +29,7 @@ flags.DEFINE_integer('gpus', 1, 'nums of gpus')
 flags.DEFINE_boolean('eval_per_class', True, 'whether evaluate per class')
 flags.DEFINE_string('mapping', None, 'path to mapping')
 flags.DEFINE_boolean('focal', True, 'whether use focal loss')
+flags.DEFINE_boolean('with_probs', True, 'whether save probs')
 flags.DEFINE_float('dropout', 0., "dropout rate")
 FLAGS = flags.FLAGS
 
@@ -162,6 +163,8 @@ def main(_):
                     per_class_evaluator.eval('Eval after %d iter' % i)
             per_class_evaluator.eval('Final')
             per_class_evaluator.save_trace(os.path.join(FLAGS.output, "tracer.pkl"))
+            if FLAGS.with_probs:
+                per_class_evaluator.save_prob_trace(os.path.join(FLAGS.output, "prob_tracer.pkl"))
 
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)

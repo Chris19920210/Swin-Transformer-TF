@@ -190,7 +190,7 @@ class EvalPerClass(object):
             trace_result[label] = self.tracer_list[i]
         pkl.dump(trace_result, open(output_path, "wb"))
 
-    def save_prob_tracer(self, output_path):
+    def save_prob_trace(self, output_path):
         prob_trace_result = {}
         for i, label in enumerate(self.labels):
             prob_trace_result[label] = self.prob_tracer_list[i]
