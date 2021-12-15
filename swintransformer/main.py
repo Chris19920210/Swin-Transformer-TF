@@ -33,7 +33,7 @@ flags.DEFINE_string('mapping', None, 'path to mapping')
 flags.DEFINE_boolean('focal', True, 'whether use focal loss')
 flags.DEFINE_boolean('with_probs', True, 'whether save probs')
 flags.DEFINE_float('dropout', 0., "dropout rate")
-flags.DEFINE_list('weights_for_classes', [2.0, 1.0], 'weights for loss')
+flags.DEFINE_list('weights_for_classes', [1.0, 1.0], 'weights for loss')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -45,12 +45,12 @@ IMAGE_SIZE = {
 def get_model(model_path, num_classes_task1, num_classes_task2, model_name="", pretrained=True, is_training=False):
     if FLAGS.model_choice == "swin":
         if not is_training:
-            inputs, model = SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)
+             model = SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)
         else:
-            inputs, model = SwinTransformer(model_path, model_name, include_top=False, drop_rate=FLAGS.dropout,
+             model = SwinTransformer(model_path, model_name, include_top=False, drop_rate=FLAGS.dropout,
                                             attn_drop_rate=FLAGS.dropout, drop_path_rate=FLAGS.dropout,
                                             pretrained=pretrained)
-        model = get_multi_tasks_model(inputs, model, num_classes_task1, num_classes_task2)
+        model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2)
         return model
 
 

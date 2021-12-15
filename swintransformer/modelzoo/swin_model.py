@@ -465,4 +465,4 @@ def SwinTransformer(model_path, model_name='swin_tiny_224', num_classes=1000, in
         else:
             net.load_weights(pretrained_ckpt)
 
-    return inputs, net
+    return net

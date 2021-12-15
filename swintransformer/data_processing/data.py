@@ -227,7 +227,7 @@ def load_dataset(data_root,
         if label_to_index is None or task1_to_task2 is None or label_to_index_task2 is None:
             label_names = sorted(item.name for item in data_root.glob('*/') if item.is_dir())
             task1_to_task2 = {label_name: label_name.split(" ")[0] for label_name in label_names}
-            task2_names = set(task1_to_task2.values())
+            task2_names = sorted(set(task1_to_task2.values()))
             label_to_index_task2 = dict((name, index) for index, name in enumerate(task2_names))
             label_to_index = dict((name, index) for index, name in enumerate(label_names))
 
