@@ -136,8 +136,9 @@ class EvalPerClass(object):
         self.sample_accu = np.zeros(len(self.labels))
         self.class_accu = np.zeros(len(self.labels))
         self.tracer_list = [[] for _ in range(len(self.labels))]
+        self.prob_tracer_list = [[] for _ in range(len(self.labels))]
 
-    def __call__(self, y_true, y_pred, paths=None):
+    def __call__(self, y_true, y_pred, paths=None, probs=None):
         if paths is None:
             for true, pred in zip(y_true, y_pred):
                 if self.mapping is not None:
@@ -145,18 +146,28 @@ class EvalPerClass(object):
                     pred = self.id_mapping_with_idx[pred]
                 self.acc(true, pred)
         else:
-            for true, pred, path in zip(y_true, y_pred, paths):
-                if self.mapping is not None:
-                    true = self.id_mapping_with_idx[true]
-                    pred = self.id_mapping_with_idx[pred]
-                self.acc(true, pred, path)
+            if probs is None:
+                for true, pred, path in zip(y_true, y_pred, paths):
+                    if self.mapping is not None:
+                        true = self.id_mapping_with_idx[true]
+                        pred = self.id_mapping_with_idx[pred]
+                    self.acc(true, pred, path)
+            else:
+                for true, pred, path, y_prob in zip(y_true, y_pred, paths, probs):
+                    for true, pred, path in zip(y_true, y_pred, paths):
+                        if self.mapping is not None:
+                            true = self.id_mapping_with_idx[true]
+                            pred = self.id_mapping_with_idx[pred]
+                        self.acc(true, pred, path, y_prob)
 
-    def acc(self, true, pred, path=None):
+    def acc(self, true, pred, path=None, y_prob=None):
         self.sample_accu[true] += 1
         if true == pred:
             self.class_accu[true] += 1
         if path is not None:
             self.tracer(true, pred, path)
+        if y_prob is not None and path is not None:
+            self.prob_tracer(path, true, y_prob)
 
     def eval(self, stage):
         acc_per_class = self.class_accu / (self.sample_accu + 1e-6)
@@ -170,8 +181,17 @@ class EvalPerClass(object):
         if true != pred:
             self.tracer_list[true].append(path.decode("utf-8"))
 
+    def prob_tracer(self, path, true, y_prob):
+        self.prob_tracer_list[true].append({'path': path, 'y_prob': y_prob})
+
     def save_trace(self, output_path):
         trace_result = {}
         for i, label in enumerate(self.labels):
             trace_result[label] = self.tracer_list[i]
         pkl.dump(trace_result, open(output_path, "wb"))
+
+    def save_prob_tracer(self, output_path):
+        prob_trace_result = {}
+        for i, label in enumerate(self.labels):
+            prob_trace_result[label] = self.prob_tracer_list[i]
+        pkl.dump(prob_trace_result, open(output_path, "wb"))

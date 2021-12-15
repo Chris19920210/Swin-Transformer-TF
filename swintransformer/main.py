@@ -154,7 +154,10 @@ def main(_):
                 per_class_evaluator = EvalPerClass(label_to_index)
             for i, (x_test, y_test, path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
                 y_pred = model.predict_classes(x_test)
-                per_class_evaluator(y_test, y_pred, path)
+                y_probs = None
+                if FLAGS.with_probs:
+                    y_probs = model.predict_proba(x_test)
+                per_class_evaluator(y_test, y_pred, path, y_probs)
                 if i % 10 == 0:
                     per_class_evaluator.eval('Eval after %d iter' % i)
             per_class_evaluator.eval('Final')
