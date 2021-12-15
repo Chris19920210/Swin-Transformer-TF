@@ -5,8 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/data_processing/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/data_processing/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/modelzoo/swin_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/modelzoo/swin_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,13 +112,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
-    </task>
-    <task id="LOCAL-00001" summary="with dataaugmentation">
-      <created>1637044212499</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1637044212499</updated>
     </task>
     <task id="LOCAL-00002" summary="delete nan checking">
       <created>1637076318397</created>
@@ -458,7 +449,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639581340028</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="multi_tasks">
+      <created>1639582662810</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1639582662811</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="ToolWindowManager">

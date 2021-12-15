@@ -280,4 +280,4 @@ def load_and_preprocess_image(path, image_size, is_training=True, augment_name='
 def load_and_preprocess_from_path_label(path, label, image_label_task2, image_size, is_training=True,
                                         augment_name='autoaugment'):
     return load_and_preprocess_image(path, image_size, is_training=is_training,
-                                     augment_name=augment_name), label, image_label_task2
+                                     augment_name=augment_name), (label, image_label_task2)
