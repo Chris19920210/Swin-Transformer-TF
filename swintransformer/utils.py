@@ -182,7 +182,7 @@ class EvalPerClass(object):
             self.tracer_list[true].append(path.decode("utf-8"))
 
     def prob_tracer(self, path, true, y_prob):
-        self.prob_tracer_list[true].append({'path': path, 'y_prob': y_prob})
+        self.prob_tracer_list[true].append({'path': path.decode("utf-8"), 'y_prob': y_prob})
 
     def save_trace(self, output_path):
         trace_result = {}
