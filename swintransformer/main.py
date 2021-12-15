@@ -67,7 +67,7 @@ def main(_):
                 optimizer=optimizer,
                 loss=[SparseCategoricalFocalLoss(gamma=2) if FLAGS.focal else SparseCategoricalCrossentropy(),
                       SparseCategoricalFocalLoss(gamma=2) if FLAGS.focal else SparseCategoricalCrossentropy()],
-                loss_weights=FLAGS.weights_for_classes,
+                loss_weights=list(map(float, FLAGS.weights_for_classes)),
                 metrics=[["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric],
                          ["sparse_categorical_accuracy", top3_acc, top5_acc, lr_metric]]
             )
