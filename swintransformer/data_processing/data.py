@@ -28,11 +28,13 @@ def preprocess_image(image_bytes, image_size, is_training=False
       A preprocessed image `Tensor` with value range of [0, 255].
     """
     if is_training:
-        return preprocess_for_train(
+        return tf.keras.applications.imagenet_utils.preprocess_input(preprocess_for_train(
             image_bytes, image_size, augment_name,
-            randaug_num_layers, randaug_magnitude)
+            randaug_num_layers, randaug_magnitude),
+            mode="torch")
     else:
-        return preprocess_for_eval(image_bytes, image_size)
+        return tf.keras.applications.imagenet_utils.preprocess_input(preprocess_for_eval(image_bytes, image_size),
+                                                                     mode="torch")
 
 
 def distorted_bounding_box_crop(image_bytes,
@@ -201,8 +203,10 @@ def train_dataset(data_root, image_size, is_training=True,
                         augment_name=augment_name, batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def val_dataset(data_root, image_size, label_to_index, batch_size=128, shuffle=False, tracer=False):
-    return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, is_training=False,
+def val_dataset(data_root, image_size, label_to_index, task1_to_task2, label_to_index_task2, batch_size=128,
+                shuffle=False, tracer=False):
+    return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, task1_to_task2=task1_to_task2,
+                        label_to_index_task2=label_to_index_task2, is_training=False,
                         batch_size=batch_size, shuffle=shuffle, with_label=True, repeat=False, tracer=tracer)
 
 
@@ -212,7 +216,7 @@ def infer_dataset(data_root, image_size, batch_size=128, shuffle=True):
 
 
 def load_dataset(data_root,
-                 image_size, label_to_index=None,
+                 image_size, label_to_index=None, task1_to_task2=None, label_to_index_task2=None,
                  is_training=False, augment_name=None, batch_size=128,
                  shuffle=True, with_label=True, repeat=True, tracer=False):
     data_root = pathlib.Path(data_root)
@@ -220,23 +224,29 @@ def load_dataset(data_root,
         all_image_paths = list(data_root.glob('*/*'))
         all_image_paths = [str(path) for path in all_image_paths]
 
-        if label_to_index is None:
+        if label_to_index is None or task1_to_task2 is None or label_to_index_task2 is None:
             label_names = sorted(item.name for item in data_root.glob('*/') if item.is_dir())
+            task1_to_task2 = {label_name: label_name.split(" ")[0] for label_name in label_names}
+            task2_names = set(task1_to_task2.values())
+            label_to_index_task2 = {(name, index) for index, name in enumerate(task2_names)}
             label_to_index = dict((name, index) for index, name in enumerate(label_names))
 
         all_image_labels = [label_to_index[pathlib.Path(path).parent.name]
                             for path in all_image_paths]
 
-        ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels))
+        all_image_labels_task2 = [label_to_index_task2[task1_to_task2[pathlib.Path(path).parent.name]]
+                                  for path in all_image_paths]
+
+        ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels, all_image_labels_task2))
 
         if not tracer:
-            ds = ds.map(lambda image_path, image_label:
-                        load_and_preprocess_from_path_label(image_path, image_label, image_size,
+            ds = ds.map(lambda image_path, image_label, image_label_task2:
+                        load_and_preprocess_from_path_label(image_path, image_label, image_label_task2, image_size,
                                                             is_training=is_training,
                                                             augment_name=augment_name))
         else:
-            ds = ds.map(lambda image_path, image_label:
-                        (*load_and_preprocess_from_path_label(image_path, image_label, image_size,
+            ds = ds.map(lambda image_path, image_label, image_label_task2:
+                        (*load_and_preprocess_from_path_label(image_path, image_label, image_label_task2, image_size,
                                                               is_training=is_training,
                                                               augment_name=augment_name), image_path))
     else:
@@ -259,7 +269,7 @@ def load_dataset(data_root,
         ds = ds.repeat(1)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size=AUTOTUNE)
-    return len(all_image_paths), label_to_index, ds
+    return len(all_image_paths), label_to_index, task1_to_task2, label_to_index_task2, ds
 
 
 def load_and_preprocess_image(path, image_size, is_training=True, augment_name='autoaugment'):
@@ -267,5 +277,7 @@ def load_and_preprocess_image(path, image_size, is_training=True, augment_name='
     return preprocess_image(image, image_size, is_training=is_training, augment_name=augment_name)
 
 
-def load_and_preprocess_from_path_label(path, label, image_size, is_training=True, augment_name='autoaugment'):
-    return load_and_preprocess_image(path, image_size, is_training=is_training, augment_name=augment_name), label
+def load_and_preprocess_from_path_label(path, label, image_label_task2, image_size, is_training=True,
+                                        augment_name='autoaugment'):
+    return load_and_preprocess_image(path, image_size, is_training=is_training,
+                                     augment_name=augment_name), label, image_label_task2

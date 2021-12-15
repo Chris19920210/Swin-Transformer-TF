@@ -4,6 +4,7 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 import numpy as np
 import pickle as pkl
+import tensorflow as tf
 
 
 def top3_acc(labels, logits):
@@ -194,3 +195,10 @@ class EvalPerClass(object):
         for i, label in enumerate(self.labels):
             prob_trace_result[label] = self.prob_tracer_list[i]
         pkl.dump(prob_trace_result, open(output_path, "wb"))
+
+
+def get_multi_tasks_model(inputs, layers, num_classes_task1, num_classes_task2):
+    task_1 = tf.keras.layers.Dense(num_classes_task1, activation='softmax')(layers)
+    task_2 = tf.keras.layers.Dense(num_classes_task2, activation='softmax')(layers)
+    model = keras.Model(inputs=inputs, outputs=[task_1, task_2])
+    return model
