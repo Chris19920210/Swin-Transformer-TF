@@ -446,7 +446,6 @@ def SwinTransformer(model_path, model_name='swin_tiny_224', num_classes=1000, in
             'window_size'], embed_dim=cfg['embed_dim'], depths=cfg['depths'], num_heads=cfg['num_heads'],
         drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate
     )
-    net.outputs
     inputs = tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3))
     net(inputs)
     if pretrained is True:
