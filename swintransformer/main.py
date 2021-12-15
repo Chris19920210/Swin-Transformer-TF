@@ -190,5 +190,6 @@ def main(_):
             print("Finish inference:", inference_results.shape)
             np.save(os.path.join(FLAGS.output, "inference_results.npy"), inference_results)
 
-    if __name__ == "__main__":
-        main(0)
+
+if __name__ == "__main__":
+    main(0)
