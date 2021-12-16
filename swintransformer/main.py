@@ -150,11 +150,6 @@ def main(_):
         )
         print("Evaluate on test data")
 
-        samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                   label_to_index,
-                                                   task1_to_task2, label_to_index_task2,
-                                                   batch_size=FLAGS.val_batch_size)
-
         if FLAGS.eval_per_class:
             samples_num, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
                                                                   IMAGE_SIZE[FLAGS.model_choice],
@@ -183,6 +178,10 @@ def main(_):
                 per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
                 per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
 
+        samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                   label_to_index,
+                                                   task1_to_task2, label_to_index_task2,
+                                                   batch_size=FLAGS.val_batch_size)
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
 
