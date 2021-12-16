@@ -548,7 +548,7 @@ def MobileNetV2(weights_path,
     elif weights is not None:
         model.load_weights(weights)
 
-    return inputs, model
+    return model
 
 
 def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):

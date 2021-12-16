@@ -52,8 +52,12 @@ def get_model(model_path, num_classes_task1, num_classes_task2, model_name="", p
             model = SwinTransformer(model_path, model_name, include_top=False, drop_rate=FLAGS.dropout,
                                     attn_drop_rate=FLAGS.dropout, drop_path_rate=FLAGS.dropout,
                                     pretrained=pretrained)
-        model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2)
-        return model
+    else:
+        model = mobilenet_v2(model_path, include_top=False)
+
+    model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2)
+
+    return model
 
 
 def main(_):
@@ -129,14 +133,8 @@ def main(_):
             pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
         if FLAGS.mode == "eval":
-            model = tf.keras.Sequential([
-                tf.keras.layers.Lambda(
-                    lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32),
-                                                                                       mode="torch"),
-                    input_shape=[IMAGE_SIZE[FLAGS.model_choice], IMAGE_SIZE[FLAGS.model_choice], 3]),
-                *get_model(FLAGS.model_path, FLAGS.model_name, False),
-                tf.keras.layers.Dense(FLAGS.num_classes, activation='softmax')
-            ])
+            model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
+                              is_training=False)
             model.load_weights(FLAGS.model_path)
             tf.keras.backend.set_learning_phase(0)
             label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
@@ -168,7 +166,7 @@ def main(_):
 
                 for i, (x_test, (y_test, y_test_task2), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
                     y_probs, y_probs_task2 = model.predict_proba(x_test)
-                    y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1),  np.argmax(y_probs_task2, axis=-1)
+                    y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1), np.argmax(y_probs_task2, axis=-1)
 
                     if FLAGS.with_probs:
                         y_probs = model.predict_proba(x_test)
@@ -190,12 +188,14 @@ def main(_):
 
         if FLAGS.mode == "infer":
             model = tf.keras.models.load_model(FLAGS.model_path)
-            _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                           batch_size=FLAGS.val_batch_size)
+            _, _, _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                 batch_size=FLAGS.val_batch_size)
 
-            inference_results = model.predict(infer_ds)
-            print("Finish inference:", inference_results.shape)
-            np.save(os.path.join(FLAGS.output, "inference_results.npy"), inference_results)
+            task1_inference_results, task2_inference_results = model.predict(infer_ds)
+            print("Task1 Finish inference:", task1_inference_results.shape)
+            print("Task2 Finish inference:", task2_inference_results.shape)
+            np.save(os.path.join(FLAGS.output, "task1_inference_results.npy"), task1_inference_results)
+            np.save(os.path.join(FLAGS.output, "task2_inference_results.npy"), task2_inference_results)
 
 
 if __name__ == "__main__":
