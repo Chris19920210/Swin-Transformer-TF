@@ -140,10 +140,6 @@ def main(_):
         label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
         task1_to_task2 = pkl.load(open(FLAGS.task1_to_task2, "rb"))
         label_to_index_task2 = pkl.load(open(FLAGS.label_to_index_task2, "rb"))
-        samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                   label_to_index,
-                                                   task1_to_task2, label_to_index_task2,
-                                                   batch_size=FLAGS.val_batch_size)
         model.save(FLAGS.output, include_optimizer=False)
         print("Model save without optimizer, Done!")
         model.compile(
@@ -155,11 +151,11 @@ def main(_):
         print("Evaluate on test data")
 
         if FLAGS.eval_per_class:
-            samples_num, _, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
-                                                                     IMAGE_SIZE[FLAGS.model_choice],
-                                                                     label_to_index, task1_to_task2,
-                                                                     label_to_index_task2,
-                                                                     batch_size=FLAGS.val_batch_size, tracer=True)
+            samples_num, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
+                                                                  IMAGE_SIZE[FLAGS.model_choice],
+                                                                  label_to_index, task1_to_task2,
+                                                                  label_to_index_task2,
+                                                                  batch_size=FLAGS.val_batch_size, tracer=True)
 
             per_class_evaluator_task1 = EvalPerClass(label_to_index)
             per_class_evaluator_task2 = EvalPerClass(label_to_index_task2)
@@ -181,6 +177,11 @@ def main(_):
             if FLAGS.with_probs:
                 per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
                 per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
+        else:
+            samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                       label_to_index,
+                                                       task1_to_task2, label_to_index_task2,
+                                                       batch_size=FLAGS.val_batch_size)
 
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
