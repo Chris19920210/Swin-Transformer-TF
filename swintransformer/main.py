@@ -24,7 +24,9 @@ flags.DEFINE_string('train_data_dir', './train_data', 'Directory to put the trai
 flags.DEFINE_string('val_data_dir', './val_data', 'Directory to put the validation data.')
 flags.DEFINE_string('infer_data_dir', './infer_data', 'Directory to put the inference data.')
 flags.DEFINE_string('output', './output', 'Directory to save model.')
-flags.DEFINE_string('label_to_index', './label_to_index.pkl', 'Directory to save model.')
+flags.DEFINE_string('label_to_index', './label_to_index.pkl', 'Directory to label_to_index.')
+flags.DEFINE_string('task1_to_task2', './task1_to_task2.pkl', 'Directory to task1_to_task2.')
+flags.DEFINE_string('label_to_index_task2', './label_to_index_task2.pkl', 'Directory to label_to_index_task2.')
 flags.DEFINE_integer('warmup_epochs', 10, 'Directory to save model.')
 flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 flags.DEFINE_integer('gpus', 1, 'nums of gpus')
@@ -160,23 +162,28 @@ def main(_):
                                                                          label_to_index, task1_to_task2,
                                                                          label_to_index_task2,
                                                                          batch_size=FLAGS.val_batch_size, tracer=True)
-                if FLAGS.mapping is not None:
-                    mapping = pkl.load(open(FLAGS.mapping, "rb"))
-                    per_class_evaluator = EvalPerClass(label_to_index, mapping=mapping)
-                else:
-                    per_class_evaluator = EvalPerClass(label_to_index)
-                for i, (x_test, y_test, path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
-                    y_pred = model.predict_classes(x_test)
-                    y_probs = None
+
+                per_class_evaluator_task1 = EvalPerClass(label_to_index)
+                per_class_evaluator_task2 = EvalPerClass(label_to_index_task2)
+
+                for i, (x_test, (y_test, y_test_task2), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
+                    y_probs, y_probs_task2 = model.predict_proba(x_test)
+                    y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1),  np.argmax(y_probs_task2, axis=-1)
+
                     if FLAGS.with_probs:
                         y_probs = model.predict_proba(x_test)
-                    per_class_evaluator(y_test, y_pred, path, y_probs)
+                        per_class_evaluator_task1(y_test, y_pred, path, y_probs)
+                        per_class_evaluator_task2(y_test_task2, y_pred_task2, path, y_probs_task2)
                     if i % 10 == 0:
-                        per_class_evaluator.eval('Eval after %d iter' % i)
-                per_class_evaluator.eval('Final')
-                per_class_evaluator.save_trace(os.path.join(FLAGS.output, "tracer.pkl"))
+                        per_class_evaluator_task1.eval('Task 1 Eval after %d iter' % i)
+                        per_class_evaluator_task2.eval('Task 2 Eval after %d iter' % i)
+                per_class_evaluator_task1.eval('Task 1 Final')
+                per_class_evaluator_task2.eval('Task 2 Final')
+                per_class_evaluator_task1.save_trace(os.path.join(FLAGS.output, "task1_tracer.pkl"))
+                per_class_evaluator_task2.save_trace(os.path.join(FLAGS.output, "task2_tracer.pkl"))
                 if FLAGS.with_probs:
-                    per_class_evaluator.save_prob_trace(os.path.join(FLAGS.output, "prob_tracer.pkl"))
+                    per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
+                    per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
 
             results = model.evaluate(val_ds)
             print("test loss, test acc:", results)

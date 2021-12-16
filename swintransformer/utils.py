@@ -1,3 +1,5 @@
+import os.path
+
 from tensorflow.python.ops import math_ops
 from tensorflow.python.framework import ops
 from tensorflow import keras
