@@ -1,24 +1,33 @@
 # Swin Transformer (Tensorflow)
-Tensorflow reimplementation of **Swin Transformer** model.   
-  
+
+Tensorflow reimplementation of **Swin Transformer** model.
+
 Based on [Official Pytorch implementation](https://github.com/microsoft/Swin-Transformer).
 ![image](https://user-images.githubusercontent.com/24825165/121768619-038e6d80-cb9a-11eb-8cb7-daa827e7772b.png)
 
 ## Requirements
+
 - `tensorflow == 2.4.1`
 
 ## Pretrained Swin Transformer Checkpoints
+
 **ImageNet-1K and ImageNet-22K Pretrained Checkpoints**  
-| name | pretrain | resolution |acc@1 | #params | model |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-|`swin_tiny_224` |ImageNet-1K |224x224|81.2|28M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_tiny_224.tgz)|
-|`swin_small_224`|ImageNet-1K |224x224|83.2|50M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_small_224.tgz)|
-|`swin_base_224` |ImageNet-22K|224x224|85.2|88M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_base_224.tgz)|
-|`swin_base_384` |ImageNet-22K|384x384|86.4|88M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_base_384.tgz)|
-|`swin_large_224`|ImageNet-22K|224x224|86.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_224.tgz)|
-|`swin_large_384`|ImageNet-22K|384x384|87.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_384.tgz)|
+| name | pretrain | resolution |acc@1 | #params | model | | :---: | :---: | :---: | :---: | :---: | :---: |
+|`swin_tiny_224` |ImageNet-1K
+|224x224|81.2|28M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_tiny_224.tgz)|
+|`swin_small_224`|ImageNet-1K
+|224x224|83.2|50M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_small_224.tgz)|
+|`swin_base_224`
+|ImageNet-22K|224x224|85.2|88M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_base_224.tgz)|
+|`swin_base_384`
+|ImageNet-22K|384x384|86.4|88M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_base_384.tgz)|
+|`swin_large_224`
+|ImageNet-22K|224x224|86.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_224.tgz)|
+|`swin_large_384`
+|ImageNet-22K|384x384|87.3|197M|[github](https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/swin_large_384.tgz)|
 
 ## Inference Demo
+
 ```python
 import tensorflow as tf
 import pickle as pkl
@@ -35,6 +44,8 @@ model = tf.keras.models.load_model('topic_model/')
 ## load image
 IMAGE_SIZE = 224
 CROP_PADDING = 32
+
+
 def _decode_and_center_crop(image_bytes, image_size):
     """Crops to center of image with padding then scales image_size."""
     shape = tf.image.extract_jpeg_shape(image_bytes)
@@ -55,6 +66,7 @@ def _decode_and_center_crop(image_bytes, image_size):
 
     return image
 
+
 def preprocess_for_eval(image_bytes, image_size):
     """Preprocesses the given image for evaluation.
     Args:
@@ -68,9 +80,11 @@ def preprocess_for_eval(image_bytes, image_size):
     image = tf.reshape(image, [image_size, image_size, 3])
     return image
 
+
 def load_and_preprocess_image(path, image_size):
     image = tf.io.read_file(path)
     return preprocess_for_eval(image, image_size)
+
 
 image = load_and_preprocess_image('topic_model/demo.jpeg', image_size=IMAGE_SIZE)
 ## with batch size
@@ -78,14 +92,18 @@ image = tf.expand_dims(image, axis=0)
 
 ## load label
 label_to_index = pkl.load(open('topic_model/label_to_index.pkl', 'rb'))
-labels = sorted(label_to_index, key=lambda key: label_to_index[key])
+label_to_index_task2 = pkl.load(open('topic_model/label_to_index_task2.pkl', 'rb'))
+labels_task1 = sorted(label_to_index, key=lambda key: label_to_index[key])
+labels_task2 = sorted(label_to_index_task2, key=lambda key: label_to_index_task2[key])
 
 ## predict
-result = model.predict(image)
-label = np.argmax(result, axis=-1)
-print(labels[label[0]])
+result_task1, result_task2 = model.predict(image)
+label_task1, label_task2 = np.argmax(result_task1, axis=-1), np.argmax(result_task2, axis=-1)
+print("task1:%s, task2:%s" % (labels_task1[label_task1[0]], labels_task2[label_task1[0]]))
 ```
+
 ## Offline Train/Eval
+
 ```shell
 # train
 python main.py --model_path path_to_pretrained_ckpt \\ #e.g. "./swin_tiny_224.ckpt" 
@@ -94,7 +112,9 @@ python main.py --model_path path_to_pretrained_ckpt \\ #e.g. "./swin_tiny_224.ck
        --val_data_dir test_data_dir \\ # one class one directory, dirname and class name is one-one mapping.
        --output output_dir \\  # save model, each ckpt is named by its corresponding epoch, 
        # save class-name -> class-index mapping which used to encode class-name to categorical index
-       --num_classes 8 --batch_size 16  --epochs 300 --model_choice swin --learning_rate 0.001 --gpus 2 --warmup_epochs 10
+       --num_classes_task1 8 --num_classes_task2 2 --batch_size 16  --epochs 300 \\
+       --model_choice swin --learning_rate 0.001 --gpus 2 --warmup_epochs 10 \\
+       --weights_for_classes 1,0.4  # weight for difference losses
 # eval
 python main.py --model_path path_to_trained_ckpt \\ #e.g. "./0288/swin_tiny_224.ckpt" 
        --label_to_index  path_to_class_name_to_class_index_pkl \\ # (i.e. dumped in training, 
@@ -102,40 +122,56 @@ python main.py --model_path path_to_trained_ckpt \\ #e.g. "./0288/swin_tiny_224.
        --output  path_to_output_the_final_model \\ # which remove params related to optimizer 
        --mode "eval" \\
        --val_data_dir test_data_dir \\  # one class one directory, dirname and class name is one-one mapping.
-       --model_name swin_tiny_224  --num_classes 8  --val_batch_size 128 --model_choice swin
+       --model_name swin_tiny_224  --num_classes_task1 8 --num_classes_task2 2 \\
+       --val_batch_size 128 --model_choice swin
+       --task1_to_task2 path_to_mapping_between_task1_to_task2 \\
+       --label_to_index_task2 path_to_class_name_to_class_index_for_task2_pkl
 ```
 
 ## Examples
+
 Initializing the model:
+
 ```python
 from swintransformer import SwinTransformer
 
 model = SwinTransformer('swin_tiny_224', num_classes=1000, include_top=True, pretrained=False)
 ```
+
 You can use a pretrained model like this:
+
 ```python
 import tensorflow as tf
 from swintransformer import SwinTransformer
 
 model = tf.keras.Sequential([
-  tf.keras.layers.Lambda(lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"), input_shape=[*IMAGE_SIZE, 3]),
-  SwinTransformer('swin_tiny_224', include_top=False, pretrained=True),
-  tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
+    tf.keras.layers.Lambda(
+        lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"),
+        input_shape=[*IMAGE_SIZE, 3]),
+    SwinTransformer('swin_tiny_224', include_top=False, pretrained=True),
+    tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 ```
+
 If you use a pretrained model with TPU on kaggle, specify `use_tpu` option:
+
 ```python
 import tensorflow as tf
 from swintransformer import SwinTransformer
 
 model = tf.keras.Sequential([
-  tf.keras.layers.Lambda(lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"), input_shape=[*IMAGE_SIZE, 3]),
-  SwinTransformer('swin_tiny_224', include_top=False, pretrained=True, use_tpu=True),
-  tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
+    tf.keras.layers.Lambda(
+        lambda data: tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(data, tf.float32), mode="torch"),
+        input_shape=[*IMAGE_SIZE, 3]),
+    SwinTransformer('swin_tiny_224', include_top=False, pretrained=True, use_tpu=True),
+    tf.keras.layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 ```
+
 Example: [TPU training on Kaggle](https://www.kaggle.com/rishigami/tpu-swin-transformer-tensorflow)
+
 ## Citation
+
 ```
 @article{liu2021Swin,
   title={Swin Transformer: Hierarchical Vision Transformer using Shifted Windows},
