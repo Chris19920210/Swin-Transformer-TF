@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="multi_tasks">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -110,13 +111,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
-    </task>
-    <task id="LOCAL-00006" summary="modify">
-      <created>1637138167838</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1637138167838</updated>
     </task>
     <task id="LOCAL-00007" summary="modify">
       <created>1637138350249</created>
@@ -454,7 +448,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639645622550</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="multi_tasks">
+      <created>1639646034099</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1639646034099</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="ToolWindowManager">

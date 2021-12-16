@@ -134,7 +134,7 @@ def main(_):
 
     if FLAGS.mode == "eval":
         model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
-                          is_training=False)
+                          pretrained=False, is_training=False)
         model.load_weights(FLAGS.model_path)
         tf.keras.backend.set_learning_phase(0)
         label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
