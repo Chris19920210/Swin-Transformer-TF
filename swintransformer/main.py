@@ -132,70 +132,69 @@ def main(_):
                                 )
             pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
-        if FLAGS.mode == "eval":
-            model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
-                              is_training=False)
-            model.load_weights(FLAGS.model_path)
-            tf.keras.backend.set_learning_phase(0)
-            label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
-            task1_to_task2 = pkl.load(open(FLAGS.task1_to_task2, "rb"))
-            label_to_index_task2 = pkl.load(open(FLAGS.label_to_index_task2, "rb"))
-            samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                       label_to_index,
-                                                       task1_to_task2, label_to_index_task2,
-                                                       batch_size=FLAGS.val_batch_size)
-            model.save(FLAGS.output, include_optimizer=False)
-            print("Model save without optimizer, Done!")
-            model.compile(
-                optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
-                loss='sparse_categorical_crossentropy',
-                metrics=[["sparse_categorical_accuracy", top3_acc, top5_acc],
-                         ["sparse_categorical_accuracy", top3_acc, top5_acc]]
-            )
-            print("Evaluate on test data")
+    if FLAGS.mode == "eval":
+        model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
+                          is_training=False)
+        model.load_weights(FLAGS.model_path)
+        tf.keras.backend.set_learning_phase(0)
+        label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
+        task1_to_task2 = pkl.load(open(FLAGS.task1_to_task2, "rb"))
+        label_to_index_task2 = pkl.load(open(FLAGS.label_to_index_task2, "rb"))
+        samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                   label_to_index,
+                                                   task1_to_task2, label_to_index_task2,
+                                                   batch_size=FLAGS.val_batch_size)
+        model.save(FLAGS.output, include_optimizer=False)
+        print("Model save without optimizer, Done!")
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(FLAGS.learning_rate),
+            loss='sparse_categorical_crossentropy',
+            metrics=[["sparse_categorical_accuracy", top3_acc, top5_acc],
+                     ["sparse_categorical_accuracy", top3_acc, top5_acc]]
+        )
+        print("Evaluate on test data")
 
-            if FLAGS.eval_per_class:
-                samples_num, _, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
-                                                                         IMAGE_SIZE[FLAGS.model_choice],
-                                                                         label_to_index, task1_to_task2,
-                                                                         label_to_index_task2,
-                                                                         batch_size=FLAGS.val_batch_size, tracer=True)
+        if FLAGS.eval_per_class:
+            samples_num, _, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
+                                                                     IMAGE_SIZE[FLAGS.model_choice],
+                                                                     label_to_index, task1_to_task2,
+                                                                     label_to_index_task2,
+                                                                     batch_size=FLAGS.val_batch_size, tracer=True)
 
-                per_class_evaluator_task1 = EvalPerClass(label_to_index)
-                per_class_evaluator_task2 = EvalPerClass(label_to_index_task2)
+            per_class_evaluator_task1 = EvalPerClass(label_to_index)
+            per_class_evaluator_task2 = EvalPerClass(label_to_index_task2)
 
-                for i, (x_test, (y_test, y_test_task2), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
-                    y_probs, y_probs_task2 = model.predict_proba(x_test)
-                    y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1), np.argmax(y_probs_task2, axis=-1)
+            for i, (x_test, (y_test, y_test_task2), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
+                y_probs, y_probs_task2 = model.predict_proba(x_test)
+                y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1), np.argmax(y_probs_task2, axis=-1)
 
-                    if FLAGS.with_probs:
-                        y_probs = model.predict_proba(x_test)
-                        per_class_evaluator_task1(y_test, y_pred, path, y_probs)
-                        per_class_evaluator_task2(y_test_task2, y_pred_task2, path, y_probs_task2)
-                    if i % 10 == 0:
-                        per_class_evaluator_task1.eval('Task 1 Eval after %d iter' % i)
-                        per_class_evaluator_task2.eval('Task 2 Eval after %d iter' % i)
-                per_class_evaluator_task1.eval('Task 1 Final')
-                per_class_evaluator_task2.eval('Task 2 Final')
-                per_class_evaluator_task1.save_trace(os.path.join(FLAGS.output, "task1_tracer.pkl"))
-                per_class_evaluator_task2.save_trace(os.path.join(FLAGS.output, "task2_tracer.pkl"))
                 if FLAGS.with_probs:
-                    per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
-                    per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
+                    per_class_evaluator_task1(y_test, y_pred, path, y_probs)
+                    per_class_evaluator_task2(y_test_task2, y_pred_task2, path, y_probs_task2)
+                if i % 10 == 0:
+                    per_class_evaluator_task1.eval('Task 1 Eval after %d iter' % i)
+                    per_class_evaluator_task2.eval('Task 2 Eval after %d iter' % i)
+            per_class_evaluator_task1.eval('Task 1 Final')
+            per_class_evaluator_task2.eval('Task 2 Final')
+            per_class_evaluator_task1.save_trace(os.path.join(FLAGS.output, "task1_tracer.pkl"))
+            per_class_evaluator_task2.save_trace(os.path.join(FLAGS.output, "task2_tracer.pkl"))
+            if FLAGS.with_probs:
+                per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
+                per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
 
-            results = model.evaluate(val_ds)
-            print("test loss, test acc:", results)
+        results = model.evaluate(val_ds)
+        print("test loss, test acc:", results)
 
-        if FLAGS.mode == "infer":
-            model = tf.keras.models.load_model(FLAGS.model_path)
-            _, _, _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                 batch_size=FLAGS.val_batch_size)
+    if FLAGS.mode == "infer":
+        model = tf.keras.models.load_model(FLAGS.model_path)
+        _, _, _, _, infer_ds = infer_dataset(FLAGS.infer_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                             batch_size=FLAGS.val_batch_size)
 
-            task1_inference_results, task2_inference_results = model.predict(infer_ds)
-            print("Task1 Finish inference:", task1_inference_results.shape)
-            print("Task2 Finish inference:", task2_inference_results.shape)
-            np.save(os.path.join(FLAGS.output, "task1_inference_results.npy"), task1_inference_results)
-            np.save(os.path.join(FLAGS.output, "task2_inference_results.npy"), task2_inference_results)
+        task1_inference_results, task2_inference_results = model.predict(infer_ds)
+        print("Task1 Finish inference:", task1_inference_results.shape)
+        print("Task2 Finish inference:", task2_inference_results.shape)
+        np.save(os.path.join(FLAGS.output, "task1_inference_results.npy"), task1_inference_results)
+        np.save(os.path.join(FLAGS.output, "task2_inference_results.npy"), task2_inference_results)
 
 
 if __name__ == "__main__":
