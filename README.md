@@ -78,7 +78,7 @@ def preprocess_for_eval(image_bytes, image_size):
     """
     image = _decode_and_center_crop(image_bytes, image_size)
     image = tf.reshape(image, [image_size, image_size, 3])
-    return image
+    return tf.keras.applications.imagenet_utils.preprocess_input(image, mode="torch")
 
 
 def load_and_preprocess_image(path, image_size):
