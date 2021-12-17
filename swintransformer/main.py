@@ -36,6 +36,7 @@ flags.DEFINE_boolean('focal', True, 'whether use focal loss')
 flags.DEFINE_boolean('with_probs', True, 'whether save probs')
 flags.DEFINE_float('dropout', 0., "dropout rate")
 flags.DEFINE_list('weights_for_classes', [1.0, 1.0], 'weights for loss')
+flags.DEFINE_list('top_layer_sizes', [128, 64], 'top layer sizes')
 FLAGS = flags.FLAGS
 
 IMAGE_SIZE = {
@@ -55,7 +56,7 @@ def get_model(model_path, num_classes_task1, num_classes_task2, model_name="", p
     else:
         model = mobilenet_v2(model_path, include_top=False)
 
-    model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2)
+    model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2, list(map(int, FLAGS.top_layer_sizes)))
 
     return model
 

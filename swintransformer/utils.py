@@ -199,8 +199,35 @@ class EvalPerClass(object):
         pkl.dump(prob_trace_result, open(output_path, "wb"))
 
 
-def get_multi_tasks_model(model, num_classes_task1, num_classes_task2):
-    task_1 = tf.keras.layers.Dense(num_classes_task1, activation='softmax')(model.output)
-    task_2 = tf.keras.layers.Dense(num_classes_task2, activation='softmax')(model.output)
+def prelu_advanced(scope=None):
+    def prelu_plus(x):
+        with tf.compat.v1.variable_scope(name_or_scope=scope,
+                                         default_name="prelu", reuse=True):
+            alpha = tf.compat.v1.get_variable("prelu", shape=x.get_shape()[-1],
+                                              dtype=x.dtype, initializer=tf.constant_initializer(0.0))
+        return tf.maximum(0.0, x) + alpha * tf.minimum(0.0, x)
+
+    return prelu_plus
+
+
+def get_multi_tasks_model(model, num_classes_task1, num_classes_task2, layer_sizes=[512, 256, 128]):
+    layers_task1 = [tf.keras.layers.Dense(layer_size, activation=prelu_advanced(scope='task_1_prelu_%d' % i)) for
+                    i, layer_size in
+                    enumerate(layer_sizes)]
+
+    layers_task2 = [tf.keras.layers.Dense(layer_size, activation=prelu_advanced(scope='task_2_prelu_%d' % i)) for
+                    i, layer_size in
+                    enumerate(layer_sizes)]
+
+    task_1 = model.output
+    task_2 = model.output
+    for layer in layers_task1:
+        task_1 = layer(task_1)
+
+    for layer in layers_task2:
+        task_2 = layer(task_2)
+
+    task_1 = tf.keras.layers.Dense(num_classes_task1, activation='softmax')(task_1)
+    task_2 = tf.keras.layers.Dense(num_classes_task2, activation='softmax')(task_2)
     model = keras.Model(inputs=model.input, outputs=[task_1, task_2])
     return model

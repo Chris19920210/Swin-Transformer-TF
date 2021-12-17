@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="readme">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/data_processing/autoaugment.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/data_processing/autoaugment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/data_processing/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/data_processing/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/swintransformer/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,13 +112,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
-    </task>
-    <task id="LOCAL-00011" summary="train minor modify">
-      <created>1637915831004</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1637915831004</updated>
     </task>
     <task id="LOCAL-00012" summary="compatible">
       <created>1637919107088</created>
@@ -456,7 +449,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639650049147</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="readme">
+      <created>1639729039255</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1639729039255</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -518,7 +518,6 @@
     <MESSAGE value="eval per class" />
     <MESSAGE value="tiny change" />
     <MESSAGE value="predict demo" />
-    <MESSAGE value="readme" />
     <MESSAGE value="small change" />
     <MESSAGE value="mapping" />
     <MESSAGE value="bug fix" />
@@ -529,7 +528,8 @@
     <MESSAGE value="save prob" />
     <MESSAGE value="save prob fix" />
     <MESSAGE value="multi_tasks" />
-    <option name="LAST_COMMIT_MESSAGE" value="multi_tasks" />
+    <MESSAGE value="readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="readme" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
