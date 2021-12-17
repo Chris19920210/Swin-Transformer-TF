@@ -53,6 +53,7 @@ def policy_v0():
         [('Posterize', 0.8, 2), ('Solarize', 0.6, 10)],
         [('Solarize', 0.6, 8), ('Equalize', 0.6, 1)],
         [('Color', 0.8, 6), ('Rotate', 0.4, 5)],
+        [('Cutout', 1.0, 10), ('Rotate', 0.4, 5)]
     ]
     return policy
 
@@ -706,7 +707,7 @@ def distort_image_with_autoaugment(image, augmentation_name):
 
     policy = available_policies[augmentation_name]()
     # Hparams that will be used for AutoAugment.
-    augmentation_hparams = HParams(cutout_const=100, translate_const=250)
+    augmentation_hparams = HParams(cutout_const=40, translate_const=40)
 
     return build_and_apply_nas_policy(policy, image, augmentation_hparams)
 
@@ -727,7 +728,7 @@ def distort_image_with_randaugment(image, num_layers, magnitude):
     """
     replace_value = [128] * 3
     tf.logging.info('Using RandAug.')
-    augmentation_hparams = HParams(cutout_const=40, translate_const=100)
+    augmentation_hparams = HParams(cutout_const=40, translate_const=40)
     available_ops = [
         'AutoContrast', 'Equalize', 'Invert', 'Rotate', 'Posterize', 'Solarize',
         'Color', 'Contrast', 'Brightness', 'Sharpness', 'ShearX', 'ShearY',

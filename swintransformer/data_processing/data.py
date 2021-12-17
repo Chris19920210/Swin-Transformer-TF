@@ -99,9 +99,9 @@ def _decode_and_random_crop(image_bytes, image_size):
     image = distorted_bounding_box_crop(
         image_bytes,
         bbox,
-        min_object_covered=0.1,
+        min_object_covered=0.5,
         aspect_ratio_range=(3. / 4, 4. / 3.),
-        area_range=(0.08, 1.0),
+        area_range=(0.5, 1.0),
         max_attempts=10)
     original_shape = tf.image.extract_jpeg_shape(image_bytes)
     bad = _at_least_x_are_equal(original_shape, tf.shape(image), 3)
@@ -198,7 +198,7 @@ def preprocess_for_train(image_bytes, image_size,
 
 
 def train_dataset(data_root, image_size, is_training=True,
-                  augment_name='autoaugment', batch_size=128, shuffle=True):
+                  augment_name='randaugment', batch_size=128, shuffle=True):
     return load_dataset(data_root, image_size=image_size, label_to_index=None, is_training=is_training,
                         augment_name=augment_name, batch_size=batch_size, shuffle=shuffle, with_label=True)
 
@@ -272,12 +272,13 @@ def load_dataset(data_root,
     return len(all_image_paths), label_to_index, task1_to_task2, label_to_index_task2, ds
 
 
-def load_and_preprocess_image(path, image_size, is_training=True, augment_name='autoaugment'):
+def load_and_preprocess_image(path, image_size, is_training=True, augment_name='randaugment'):
     image = tf.io.read_file(path)
-    return preprocess_image(image, image_size, is_training=is_training, augment_name=augment_name)
+    return preprocess_image(image, image_size, is_training=is_training, augment_name=augment_name, randaug_magnitude=15,
+                            randaug_num_layers=2)
 
 
 def load_and_preprocess_from_path_label(path, label, image_label_task2, image_size, is_training=True,
-                                        augment_name='autoaugment'):
+                                        augment_name='randaugment'):
     return load_and_preprocess_image(path, image_size, is_training=is_training,
                                      augment_name=augment_name), (label, image_label_task2)
