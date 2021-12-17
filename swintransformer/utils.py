@@ -199,23 +199,14 @@ class EvalPerClass(object):
         pkl.dump(prob_trace_result, open(output_path, "wb"))
 
 
-def prelu_advanced(scope=None):
-    def prelu_plus(x):
-        with tf.compat.v1.variable_scope(name_or_scope=scope,
-                                         default_name="prelu", reuse=True):
-            alpha = tf.compat.v1.get_variable("prelu", shape=x.get_shape()[-1],
-                                              dtype=x.dtype, initializer=tf.constant_initializer(0.0))
-        return tf.maximum(0.0, x) + alpha * tf.minimum(0.0, x)
-
-    return prelu_plus
-
-
 def get_multi_tasks_model(model, num_classes_task1, num_classes_task2, layer_sizes=[512, 256, 128]):
-    layers_task1 = [tf.keras.layers.Dense(layer_size, activation=prelu_advanced(scope='task_1_prelu_%d' % i)) for
+    layers_task1 = [tf.keras.layers.Dense(layer_size, activation=tf.keras.layers.PReLU(
+        alpha_initializer=tf.initializers.constant(0.25))) for
                     i, layer_size in
                     enumerate(layer_sizes)]
 
-    layers_task2 = [tf.keras.layers.Dense(layer_size, activation=prelu_advanced(scope='task_2_prelu_%d' % i)) for
+    layers_task2 = [tf.keras.layers.Dense(layer_size, activation=tf.keras.layers.PReLU(
+        alpha_initializer=tf.initializers.constant(0.25))) for
                     i, layer_size in
                     enumerate(layer_sizes)]
 
