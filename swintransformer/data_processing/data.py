@@ -13,7 +13,6 @@ def preprocess_image(image_bytes, image_size, is_training=False
     Args:
       image_bytes: `Tensor` representing an image binary of arbitrary size.
       is_training: `bool` for whether the preprocessing is for training.
-      use_bfloat16: `bool` for whether to use bfloat16.
       image_size: image size.
       augment_name: `string` that is the name of the augmentation method
         to apply to the image. `autoaugment` if AutoAugment is to be used or
@@ -199,24 +198,27 @@ def preprocess_for_train(image_bytes, image_size,
 
 def train_dataset(data_root, image_size, is_training=True,
                   augment_name='randaugment', batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, label_to_index=None, is_training=is_training,
+    return load_dataset(data_root, image_size=image_size, is_training=is_training,
                         augment_name=augment_name, batch_size=batch_size, shuffle=shuffle, with_label=True)
 
 
-def val_dataset(data_root, image_size, label_to_index, task1_to_task2, label_to_index_task2, batch_size=128,
+def val_dataset(data_root, image_size, task_to_task0, label_to_index_task0, task_to_task1, label_to_index_task1,
+                batch_size=128,
                 shuffle=False, tracer=False):
-    return load_dataset(data_root, image_size=image_size, label_to_index=label_to_index, task1_to_task2=task1_to_task2,
-                        label_to_index_task2=label_to_index_task2, is_training=False,
+    return load_dataset(data_root, image_size=image_size, task_to_task0=task_to_task0,
+                        label_to_index_task0=label_to_index_task0, task_to_task1=task_to_task1,
+                        label_to_index_task1=label_to_index_task1, is_training=False,
                         batch_size=batch_size, shuffle=shuffle, with_label=True, repeat=False, tracer=tracer)
 
 
 def infer_dataset(data_root, image_size, batch_size=128, shuffle=True):
-    return load_dataset(data_root, image_size=image_size, label_to_index=None, is_training=False,
+    return load_dataset(data_root, image_size=image_size, is_training=False,
                         batch_size=batch_size, shuffle=shuffle, with_label=False, repeat=False)
 
 
 def load_dataset(data_root,
-                 image_size, label_to_index=None, task1_to_task2=None, label_to_index_task2=None,
+                 image_size, task_to_task0=None, label_to_index_task0=None, task_to_task1=None,
+                 label_to_index_task1=None,
                  is_training=False, augment_name=None, batch_size=128,
                  shuffle=True, with_label=True, repeat=True, tracer=False):
     data_root = pathlib.Path(data_root)
@@ -224,20 +226,23 @@ def load_dataset(data_root,
         all_image_paths = list(data_root.glob('*/*'))
         all_image_paths = [str(path) for path in all_image_paths]
 
-        if label_to_index is None or task1_to_task2 is None or label_to_index_task2 is None:
+        if task_to_task0 is None or label_to_index_task0 is None or task_to_task1 is None \
+                or label_to_index_task1 is None:
             label_names = sorted(item.name for item in data_root.glob('*/') if item.is_dir())
-            task1_to_task2 = {label_name: label_name.split(" ")[0] for label_name in label_names}
-            task2_names = sorted(set(task1_to_task2.values()))
-            label_to_index_task2 = dict((name, index) for index, name in enumerate(task2_names))
-            label_to_index = dict((name, index) for index, name in enumerate(label_names))
+            task_to_task0 = {label_name: label_name.split(" ")[0] for label_name in label_names}
+            task0_names = sorted(set(task_to_task0.values()))
+            label_to_index_task0 = dict((name, index) for index, name in enumerate(task0_names))
+            task_to_task1 = {label_name: label_name.split(" ")[1] for label_name in label_names}
+            task1_names = sorted(set(task_to_task1.values()))
+            label_to_index_task1 = dict((name, index) for index, name in enumerate(task1_names))
 
-        all_image_labels = [label_to_index[pathlib.Path(path).parent.name]
-                            for path in all_image_paths]
-
-        all_image_labels_task2 = [label_to_index_task2[task1_to_task2[pathlib.Path(path).parent.name]]
+        all_image_labels_task0 = [label_to_index_task0[task_to_task0[pathlib.Path(path).parent.name]]
                                   for path in all_image_paths]
 
-        ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels, all_image_labels_task2))
+        all_image_labels_task1 = [label_to_index_task1[task_to_task1[pathlib.Path(path).parent.name]]
+                                  for path in all_image_paths]
+
+        ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels_task0, all_image_labels_task1))
 
         if not tracer:
             ds = ds.map(lambda image_path, image_label, image_label_task2:
@@ -269,7 +274,7 @@ def load_dataset(data_root,
         ds = ds.repeat(1)
     ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size=AUTOTUNE)
-    return len(all_image_paths), label_to_index, task1_to_task2, label_to_index_task2, ds
+    return len(all_image_paths), task_to_task0, label_to_index_task0, task_to_task1, label_to_index_task1, ds
 
 
 def load_and_preprocess_image(path, image_size, is_training=True, augment_name='randaugment'):

@@ -24,9 +24,10 @@ flags.DEFINE_string('train_data_dir', './train_data', 'Directory to put the trai
 flags.DEFINE_string('val_data_dir', './val_data', 'Directory to put the validation data.')
 flags.DEFINE_string('infer_data_dir', './infer_data', 'Directory to put the inference data.')
 flags.DEFINE_string('output', './output', 'Directory to save model.')
-flags.DEFINE_string('label_to_index', './label_to_index.pkl', 'Directory to label_to_index.')
-flags.DEFINE_string('task1_to_task2', './task1_to_task2.pkl', 'Directory to task1_to_task2.')
-flags.DEFINE_string('label_to_index_task2', './label_to_index_task2.pkl', 'Directory to label_to_index_task2.')
+flags.DEFINE_string('task_to_task0', './task_to_task0.pkl', 'Directory to task_to_task0.')
+flags.DEFINE_string('label_to_index_task0', './label_to_index_task0.pkl', 'Directory to label_to_index_task0.')
+flags.DEFINE_string('task_to_task1', './task_to_task1.pkl', 'Directory to task_to_task1.')
+flags.DEFINE_string('label_to_index_task1', './label_to_index_task1.pkl', 'Directory to label_to_index_task1.')
 flags.DEFINE_integer('warmup_epochs', 10, 'Directory to save model.')
 flags.DEFINE_string('model_choice', 'swin', 'swin/mobile')
 flags.DEFINE_integer('gpus', 1, 'nums of gpus')
@@ -83,17 +84,19 @@ def main(_):
             # load data
             batch_size = FLAGS.batch_size * strategy.num_replicas_in_sync
             val_batch_size = FLAGS.val_batch_size * strategy.num_replicas_in_sync
-            samples_num, label_to_index, task1_to_task2, label_to_index_task2, train_ds = train_dataset(
-                FLAGS.train_data_dir,
-                IMAGE_SIZE[FLAGS.model_choice],
-                batch_size=batch_size)
+            samples_num, task_to_task0, label_to_index_task0, task_to_task1, label_to_index_task1, train_ds = \
+                train_dataset(
+                    FLAGS.train_data_dir,
+                    IMAGE_SIZE[FLAGS.model_choice],
+                    batch_size=batch_size)
 
-            _, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir,
-                                             IMAGE_SIZE[FLAGS.model_choice],
-                                             label_to_index,
-                                             task1_to_task2,
-                                             label_to_index_task2,
-                                             batch_size=val_batch_size)
+            _, _, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir,
+                                                IMAGE_SIZE[FLAGS.model_choice],
+                                                task_to_task0,
+                                                label_to_index_task0,
+                                                task_to_task1,
+                                                label_to_index_task1,
+                                                batch_size=val_batch_size)
 
             options = tf.data.Options()
             options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
@@ -121,9 +124,10 @@ def main(_):
                 warm_up_lr
             ]
 
-            pkl.dump(label_to_index, open(os.path.join(FLAGS.output, "label_to_index.pkl"), "wb"))
-            pkl.dump(task1_to_task2, open(os.path.join(FLAGS.output, "task1_to_task2.pkl"), "wb"))
-            pkl.dump(label_to_index_task2, open(os.path.join(FLAGS.output, "label_to_index_task2.pkl"), "wb"))
+            pkl.dump(task_to_task0, open(os.path.join(FLAGS.output, "task_to_task0.pkl"), "wb"))
+            pkl.dump(label_to_index_task0, open(os.path.join(FLAGS.output, "label_to_index_task0.pkl"), "wb"))
+            pkl.dump(task_to_task1, open(os.path.join(FLAGS.output, "task_to_task1.pkl"), "wb"))
+            pkl.dump(label_to_index_task1, open(os.path.join(FLAGS.output, "label_to_index_task1.pkl"), "wb"))
 
             steps_per_epoch = samples_num // batch_size
 
@@ -138,9 +142,10 @@ def main(_):
                           pretrained=False, is_training=False)
         model.load_weights(FLAGS.model_path)
         tf.keras.backend.set_learning_phase(0)
-        label_to_index = pkl.load(open(FLAGS.label_to_index, "rb"))
-        task1_to_task2 = pkl.load(open(FLAGS.task1_to_task2, "rb"))
-        label_to_index_task2 = pkl.load(open(FLAGS.label_to_index_task2, "rb"))
+        task_to_task0 = pkl.load(open(FLAGS.task_to_task0, "rb"))
+        label_to_index_task0 = pkl.load(open(FLAGS.label_to_index_task0, "rb"))
+        task_to_task1 = pkl.load(open(FLAGS.task_to_task1, "rb"))
+        label_to_index_task1 = pkl.load(open(FLAGS.label_to_index_task1, "rb"))
         model.save(FLAGS.output, include_optimizer=False)
         print("Model save without optimizer, Done!")
         model.compile(
@@ -152,36 +157,36 @@ def main(_):
         print("Evaluate on test data")
 
         if FLAGS.eval_per_class:
-            samples_num, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
-                                                                  IMAGE_SIZE[FLAGS.model_choice],
-                                                                  label_to_index, task1_to_task2,
-                                                                  label_to_index_task2,
-                                                                  batch_size=FLAGS.val_batch_size, tracer=True)
+            samples_num, _, _, _, _, val_ds_with_trace = val_dataset(FLAGS.val_data_dir,
+                                                                     IMAGE_SIZE[FLAGS.model_choice],
+                                                                     task_to_task0, label_to_index_task0,
+                                                                     task_to_task1, label_to_index_task1,
+                                                                     batch_size=FLAGS.val_batch_size, tracer=True)
 
-            per_class_evaluator_task1 = EvalPerClass(label_to_index)
-            per_class_evaluator_task2 = EvalPerClass(label_to_index_task2)
+            per_class_evaluator_task0 = EvalPerClass(label_to_index_task0)
+            per_class_evaluator_task1 = EvalPerClass(label_to_index_task1)
 
-            for i, (x_test, (y_test, y_test_task2), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
-                y_probs, y_probs_task2 = model.predict(x_test)
-                y_pred, y_pred_task2 = np.argmax(y_probs, axis=-1), np.argmax(y_probs_task2, axis=-1)
+            for i, (x_test, (y_test_task0, y_test_task1), path) in enumerate(val_ds_with_trace.as_numpy_iterator()):
+                y_probs_task0, y_probs_task1 = model.predict(x_test)
+                y_pred_task0, y_pred_task1 = np.argmax(y_probs_task0, axis=-1), np.argmax(y_probs_task1, axis=-1)
 
                 if FLAGS.with_probs:
-                    per_class_evaluator_task1(y_test, y_pred, path, y_probs)
-                    per_class_evaluator_task2(y_test_task2, y_pred_task2, path, y_probs_task2)
+                    per_class_evaluator_task0(y_test_task0, y_pred_task0, path, y_probs_task0)
+                    per_class_evaluator_task1(y_test_task1, y_pred_task1, path, y_probs_task1)
                 if i % 10 == 0:
+                    per_class_evaluator_task0.eval('Task 0 Eval after %d iter' % i)
                     per_class_evaluator_task1.eval('Task 1 Eval after %d iter' % i)
-                    per_class_evaluator_task2.eval('Task 2 Eval after %d iter' % i)
+            per_class_evaluator_task0.eval('Task 0 Final')
             per_class_evaluator_task1.eval('Task 1 Final')
-            per_class_evaluator_task2.eval('Task 2 Final')
+            per_class_evaluator_task0.save_trace(os.path.join(FLAGS.output, "task0_tracer.pkl"))
             per_class_evaluator_task1.save_trace(os.path.join(FLAGS.output, "task1_tracer.pkl"))
-            per_class_evaluator_task2.save_trace(os.path.join(FLAGS.output, "task2_tracer.pkl"))
             if FLAGS.with_probs:
+                per_class_evaluator_task0.save_prob_trace(os.path.join(FLAGS.output, "task0_prob_tracer.pkl"))
                 per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
-                per_class_evaluator_task2.save_prob_trace(os.path.join(FLAGS.output, "task2_prob_tracer.pkl"))
 
         samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                   label_to_index,
-                                                   task1_to_task2, label_to_index_task2,
+                                                   task_to_task0, label_to_index_task0,
+                                                   task_to_task1, label_to_index_task1,
                                                    batch_size=FLAGS.val_batch_size)
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
