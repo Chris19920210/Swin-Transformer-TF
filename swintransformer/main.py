@@ -15,8 +15,8 @@ flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 2, 'Number of steps to run trainer.')
 flags.DEFINE_integer('batch_size', 128, 'batch size')
 flags.DEFINE_integer('val_batch_size', 128, 'batch size')
-flags.DEFINE_integer('num_classes_task0', 10, 'num classes for task1')
-flags.DEFINE_integer('num_classes_task1', 10, 'num classes for task2')
+flags.DEFINE_integer('num_classes_task0', 10, 'num classes for task0')
+flags.DEFINE_integer('num_classes_task1', 10, 'num classes for task1')
 flags.DEFINE_string('model_path', './swin_base_224', 'path to model ckpt')
 flags.DEFINE_string('model_name', 'swin_base_224', 'model name')
 flags.DEFINE_string('mode', 'train', 'train/evaluate/inference')
@@ -138,7 +138,7 @@ def main(_):
             pkl.dump(history.history, open(os.path.join(FLAGS.output, "history"), "wb"))
 
     if FLAGS.mode == "eval":
-        model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
+        model = get_model(FLAGS.model_path, FLAGS.num_classes_task0, FLAGS.num_classes_task1, FLAGS.model_name,
                           pretrained=False, is_training=False)
         model.load_weights(FLAGS.model_path)
         tf.keras.backend.set_learning_phase(0)
