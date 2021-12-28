@@ -46,7 +46,7 @@ IMAGE_SIZE = {
 }
 
 
-def get_model(model_path, num_classes_task1, num_classes_task2, model_name="", pretrained=True, is_training=False):
+def get_model(model_path, num_classes_task0, num_classes_task1, model_name="", pretrained=True, is_training=False):
     if FLAGS.model_choice == "swin":
         if not is_training:
             model = SwinTransformer(model_path, model_name, include_top=False, pretrained=pretrained)
@@ -57,7 +57,7 @@ def get_model(model_path, num_classes_task1, num_classes_task2, model_name="", p
     else:
         model = mobilenet_v2(model_path, include_top=False)
 
-    model = get_multi_tasks_model(model, num_classes_task1, num_classes_task2, list(map(int, FLAGS.top_layer_sizes)))
+    model = get_multi_tasks_model(model, num_classes_task0, num_classes_task1, list(map(int, FLAGS.top_layer_sizes)))
 
     return model
 
@@ -67,7 +67,7 @@ def main(_):
         device_list = ["/gpu:%d" % i for i in range(FLAGS.gpus)]
         strategy = tf.distribute.MirroredStrategy(devices=device_list)
         with strategy.scope():
-            model = get_model(FLAGS.model_path, FLAGS.num_classes_task1, FLAGS.num_classes_task2, FLAGS.model_name,
+            model = get_model(FLAGS.model_path, FLAGS.num_classes_task0, FLAGS.num_classes_task1, FLAGS.model_name,
                               is_training=True)
             optimizer = tf.keras.optimizers.Adam()
             lr_metric = get_lr_metric(optimizer)

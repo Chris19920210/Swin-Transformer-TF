@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="top change">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="fix">
+      <change beforePath="$PROJECT_DIR$/swintransformer/data_processing/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/data_processing/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -111,13 +111,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
-    </task>
-    <task id="LOCAL-00015" summary="compatible">
-      <created>1637921792677</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1637921792677</updated>
     </task>
     <task id="LOCAL-00016" summary="compatible">
       <created>1637942971867</created>
@@ -455,7 +448,14 @@
       <option name="project" value="LOCAL" />
       <updated>1640680991581</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="fix">
+      <created>1640682072731</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1640682072731</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -522,14 +522,14 @@
     <MESSAGE value="bug fix" />
     <MESSAGE value="with focal loss" />
     <MESSAGE value="format" />
-    <MESSAGE value="fix" />
     <MESSAGE value="dropout" />
     <MESSAGE value="save prob" />
     <MESSAGE value="save prob fix" />
     <MESSAGE value="multi_tasks" />
     <MESSAGE value="readme" />
     <MESSAGE value="top change" />
-    <option name="LAST_COMMIT_MESSAGE" value="top change" />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

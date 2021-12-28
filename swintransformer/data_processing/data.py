@@ -245,13 +245,13 @@ def load_dataset(data_root,
         ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels_task0, all_image_labels_task1))
 
         if not tracer:
-            ds = ds.map(lambda image_path, image_label, image_label_task2:
-                        load_and_preprocess_from_path_label(image_path, image_label, image_label_task2, image_size,
+            ds = ds.map(lambda image_path, image_label_task0, image_label_task1:
+                        load_and_preprocess_from_path_label(image_path, image_label_task0, image_label_task1, image_size,
                                                             is_training=is_training,
                                                             augment_name=augment_name))
         else:
-            ds = ds.map(lambda image_path, image_label, image_label_task2:
-                        (*load_and_preprocess_from_path_label(image_path, image_label, image_label_task2, image_size,
+            ds = ds.map(lambda image_path, image_label_task0, image_label_task1:
+                        (*load_and_preprocess_from_path_label(image_path, image_label_task0, image_label_task1, image_size,
                                                               is_training=is_training,
                                                               augment_name=augment_name), image_path))
     else:
