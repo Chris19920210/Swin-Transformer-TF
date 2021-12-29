@@ -184,10 +184,10 @@ def main(_):
                 per_class_evaluator_task0.save_prob_trace(os.path.join(FLAGS.output, "task0_prob_tracer.pkl"))
                 per_class_evaluator_task1.save_prob_trace(os.path.join(FLAGS.output, "task1_prob_tracer.pkl"))
 
-        samples_num, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
-                                                   task_to_task0, label_to_index_task0,
-                                                   task_to_task1, label_to_index_task1,
-                                                   batch_size=FLAGS.val_batch_size)
+        samples_num, _, _, _, _, val_ds = val_dataset(FLAGS.val_data_dir, IMAGE_SIZE[FLAGS.model_choice],
+                                                      task_to_task0, label_to_index_task0,
+                                                      task_to_task1, label_to_index_task1,
+                                                      batch_size=FLAGS.val_batch_size)
         results = model.evaluate(val_ds)
         print("test loss, test acc:", results)
 

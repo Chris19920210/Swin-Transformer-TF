@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6d928b59-9458-4eb0-ac13-5c3b2a162159" name="Default" comment="fix">
-      <change beforePath="$PROJECT_DIR$/swintransformer/data_processing/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/data_processing/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/swintransformer/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/swintransformer/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,20 +110,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1635929871862</updated>
-    </task>
-    <task id="LOCAL-00016" summary="compatible">
-      <created>1637942971867</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1637942971867</updated>
-    </task>
-    <task id="LOCAL-00017" summary="save model">
-      <created>1638157354766</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1638157354766</updated>
     </task>
     <task id="LOCAL-00018" summary="save model properly">
       <created>1638162687094</created>
@@ -455,7 +440,21 @@
       <option name="project" value="LOCAL" />
       <updated>1640682072731</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="fix">
+      <created>1640682427510</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1640682427510</updated>
+    </task>
+    <task id="LOCAL-00066" summary="fix">
+      <created>1640682506024</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1640682506024</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="ToolWindowManager">
