@@ -91,41 +91,40 @@ image = load_and_preprocess_image('topic_model/demo.jpeg', image_size=IMAGE_SIZE
 image = tf.expand_dims(image, axis=0)
 
 ## load label
-label_to_index = pkl.load(open('topic_model/label_to_index.pkl', 'rb'))
-label_to_index_task2 = pkl.load(open('topic_model/label_to_index_task2.pkl', 'rb'))
-labels_task1 = sorted(label_to_index, key=lambda key: label_to_index[key])
-labels_task2 = sorted(label_to_index_task2, key=lambda key: label_to_index_task2[key])
+label_to_index_task0 = pkl.load(open('topic_model/label_to_index_task0.pkl', 'rb'))
+label_to_index_task1 = pkl.load(open('topic_model/label_to_index_task1.pkl', 'rb'))
+labels_task0 = sorted(label_to_index_task0, key=lambda key: label_to_index_task0[key])
+labels_task1 = sorted(label_to_index_task1, key=lambda key: label_to_index_task1[key])
 
 ## predict
-result_task1, result_task2 = model.predict(image)
-label_task1, label_task2 = np.argmax(result_task1, axis=-1), np.argmax(result_task2, axis=-1)
-print("task1:%s, task2:%s" % (labels_task1[label_task1[0]], labels_task2[label_task1[0]]))
+result_task0, result_task1 = model.predict(image)
+label_task0, label_task1 = np.argmax(result_task0, axis=-1), np.argmax(result_task1, axis=-1)
+print("task0:%s, task1:%s" % (labels_task1[label_task0[0]], labels_task1[label_task1[0]]))
 ```
 
 ## Offline Train/Eval
 
 ```shell
 # train
-python main.py --model_path path_to_pretrained_ckpt \\ #e.g. "./swin_tiny_224.ckpt" 
-       --model_name swin_tiny_224 \\
-       --train_data_dir train_data_dir  \\ # one class one directory, dirname and class name is one-one mapping. 
-       --val_data_dir test_data_dir \\ # one class one directory, dirname and class name is one-one mapping.
-       --output output_dir \\  # save model, each ckpt is named by its corresponding epoch, 
-       # save class-name -> class-index mapping which used to encode class-name to categorical index
-       --num_classes_task1 8 --num_classes_task2 2 --batch_size 16  --epochs 300 \\
-       --model_choice swin --learning_rate 0.001 --gpus 2 --warmup_epochs 10 \\
-       --weights_for_classes 1,0.4  # weight for difference losses
+python main.py --model_path \
+ /home/rihan.crh/talkingdata_project/swin_tiny_224/swin_tiny_224.ckpt \
+  --model_name swin_tiny_224 --train_data_dir /home/rihan.crh/talkingdata_project/image_style_v2/train/ \ 
+  --val_data_dir /home/rihan.crh/talkingdata_project/image_style_v2/test/ \ 
+  --output /home/rihan.crh/talkingdata_project/swin_model_results_style \ 
+  --num_classes_task0 2 --num_classes_task1 6 --batch_size 32 --epochs 400 \ 
+  --model_choice swin --learning_rate 0.0015 --gpus 2 --warmup_epochs 10 \ 
+  --weights_for_classes 0.2,1.0 --top_layer_sizes 64,32
 # eval
-python main.py --model_path path_to_trained_ckpt \\ #e.g. "./0288/swin_tiny_224.ckpt" 
-       --label_to_index  path_to_class_name_to_class_index_pkl \\ # (i.e. dumped in training, 
-       # class-name -> class-index mapping, e.g. ./label_to_index.pkl) 
-       --output  path_to_output_the_final_model \\ # which remove params related to optimizer 
-       --mode "eval" \\
-       --val_data_dir test_data_dir \\  # one class one directory, dirname and class name is one-one mapping.
-       --model_name swin_tiny_224  --num_classes_task1 8 --num_classes_task2 2 \\
-       --val_batch_size 128 --model_choice swin
-       --task1_to_task2 path_to_mapping_between_task1_to_task2 \\
-       --label_to_index_task2 path_to_class_name_to_class_index_for_task2_pkl
+python main.py --model_path \
+/home/rihan.crh/talkingdata_project/swin_model_results_style/0357/swin_tiny_224.ckpt \
+ --model_name swin_tiny_224  --val_data_dir /home/rihan.crh/talkingdata_project/image_style_v2/test/  \
+ --num_classes_task0 2 --num_classes_task1 6 --val_batch_size 128 \
+ --model_choice swin --mode eval \
+ --task_to_task0 /home/rihan.crh/talkingdata_project/swin_model_results_style/task_to_task0.pkl \ 
+ --label_to_index_task0 /home/rihan.crh/talkingdata_project/swin_model_results_style/label_to_index_task0.pkl \ 
+ --task_to_task1 /home/rihan.crh/talkingdata_project/swin_model_results_style/task_to_task1.pkl \
+  --label_to_index_task1 /home/rihan.crh/talkingdata_project/swin_model_results_style/label_to_index_task1.pkl \ 
+  --output /home/rihan.crh/talkingdata_project/swin_model_results_style --top_layer_sizes 64,32
 ```
 
 ## Examples
